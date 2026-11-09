@@ -1,49 +1,168 @@
 name: Deploy to GitHub Pages
 
+# GitHub Pages: Source = "Deploy from a branch" -> gh-pages, / (root)
+# push в main    -> основной сайт  lgaus.github.io/dianamatrix/      (корень gh-pages, папка dev/ не трогается)
+# push в develop -> тестовый сайт  lgaus.github.io/dianamatrix/dev/  (только папка dev/ в gh-pages)
+
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
+# По умолчанию только чтение; право записи — только у job deploy
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
+# Отдельная группа на ветку: деплои одной ветки идут по очереди, main и develop — параллельно.
+# Это безопасно: main пишет только корень gh-pages (папка /dev/ защищена clean-exclude),
+# develop — только папку dev/. Файлы не пересекаются, поэтому при одновременном push
+# action с force: false делает fetch + rebase без конфликтов (attempt-limit по умолчанию 3).
 concurrency:
-  group: pages
+  group: gh-pages-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
-  build:
+  # test и build идут параллельно: в Actions отдельно видно, работает ли сборка и прошли ли тесты.
+  # deploy ждёт оба — если тесты или typecheck упали, деплоя нет.
+  test:
+    # workflow_dispatch из других веток ничего не проверяет, не собирает и не деплоит
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: 'Setup: checkout'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      # nuxi läuft über #!/usr/bin/env node -> Node >= 22 nötig (Nuxt 4)
-      - uses: actions/setup-node@v4
+      # nuxi запускается через #!/usr/bin/env node -> нужен Node >= 22 (Nuxt 4)
+      - name: 'Setup: Node 22'
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - uses: oven-sh/setup-bun@v2
+      # setup-bun@v2 кэширует только сам бинарник bun, кэша зависимостей у него нет
+      - name: 'Setup: Bun'
+        uses: oven-sh/setup-bun@v2
 
-      - run: bun install --frozen-lockfile
+      # Глобальный кэш загрузок bun (~/.bun/install/cache), не node_modules.
+      # Ключ меняется вместе с bun.lock; restore-keys берёт последний кэш для этой ОС,
+      # bun install докачивает только недостающие пакеты.
+      - name: 'Setup: Bun dependency cache'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
-      - run: bunx nuxi generate
+      - name: 'Setup: install dependencies'
+        run: bun install --frozen-lockfile
+
+      - name: Tests (vitest)
+        run: bun run test
+
+      - name: Type check (nuxi typecheck)
+        run: bunx nuxi typecheck
+
+  build:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: 'Setup: checkout'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # nuxi запускается через #!/usr/bin/env node -> нужен Node >= 22 (Nuxt 4)
+      - name: 'Setup: Node 22'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # setup-bun@v2 кэширует только сам бинарник bun, кэша зависимостей у него нет
+      - name: 'Setup: Bun'
+        uses: oven-sh/setup-bun@v2
+
+      # Глобальный кэш загрузок bun (~/.bun/install/cache), не node_modules.
+      # Ключ меняется вместе с bun.lock; restore-keys берёт последний кэш для этой ОС,
+      # bun install докачивает только недостающие пакеты.
+      - name: 'Setup: Bun dependency cache'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 'Setup: install dependencies'
+        run: bun install --frozen-lockfile
+
+      - name: Build (main)
+        if: github.ref == 'refs/heads/main'
+        run: bunx nuxi generate
         env:
           NITRO_PRESET: github_pages
           NUXT_APP_BASE_URL: /dianamatrix/
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Build (develop)
+        if: github.ref == 'refs/heads/develop'
+        run: bunx nuxi generate
+        env:
+          NITRO_PRESET: github_pages
+          NUXT_APP_BASE_URL: /dianamatrix/dev/
+          SITE_NOINDEX: 'true'
+
+      # include-hidden-files: с upload-artifact v4.4 скрытые файлы исключаются, без него .nojekyll не попадёт в артефакт
+      # if-no-files-found: error — если .output/public пуст или отсутствует, build падает сразу на upload с понятной ошибкой
+      # (без этого упал бы download-artifact в deploy; деплоя не было бы в любом случае)
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: ./.output/public
+          name: site
+          path: .output/public
+          include-hidden-files: true
+          if-no-files-found: error
 
   deploy:
-    needs: build
+    needs: [test, build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # Нужен action'у деплоя для git; код проекта здесь не запускается
+      - name: 'Setup: checkout'
+        uses: actions/checkout@v4
+
+      - name: 'Setup: download site artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+
+      # Корень gh-pages; /dev/ защищена от очистки (rsync filter "P /dev/")
+      - name: Deploy (main)
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
+        with:
+          branch: gh-pages
+          folder: site
+          clean: true
+          clean-exclude: |
+            /dev/
+          force: false
+
+      # Только папка dev/ в gh-pages; clean чистит только внутри dev/
+      - name: Deploy (develop)
+        if: github.ref == 'refs/heads/develop'
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
+        with:
+          branch: gh-pages
+          folder: site
+          target-folder: dev
+          clean: true
+          force: false

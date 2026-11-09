@@ -4,8 +4,15 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  // Reines SPA für GitHub Pages (statisches Hosting, kein Server)
+  // Чистое SPA для GitHub Pages (статический хостинг, без сервера)
   ssr: false,
+  // Тестовый сайт (develop -> /dianamatrix/dev/) собирается с SITE_NOINDEX=true: поисковики его не индексируют.
+  // В прод-сборке переменной нет — мета-тега нет.
+  app: {
+    head: {
+      meta: process.env.SITE_NOINDEX === 'true' ? [{ name: 'robots', content: 'noindex' }] : [],
+    },
+  },
   css: ['~/assets/css/main.css'],
   vite: {
     plugins: [tailwindcss()],
