@@ -2,6 +2,7 @@
 // Плейсхолдеры в квадратных скобках — временные заглушки.
 // TODO: заменить все плейсхолдеры [...] настоящими данными (строки помечены TODO ниже).
 // Ключи с суффиксом Mobile — тексты, которые на телефоне отличаются от компьютера.
+import type { ChakraId } from '../utils/matrix/types'
 
 // Слова формул «Предназначения»; они же названия карточек (personal, social, spiritual, planetary)
 const purposeTerms = {
@@ -65,7 +66,7 @@ export const texts = {
       manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ' },
       svadhisthana: { name: 'Свадхистхана', zone: 'Поясница, репродуктивная система' },
       muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги' },
-    },
+    } satisfies Record<ChakraId, { name: string, zone: string }>,
   },
 
   purpose: {
