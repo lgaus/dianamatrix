@@ -22,39 +22,93 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    # workflow_dispatch из других веток ничего не собирает и не деплоит
+  # test и build идут параллельно: в Actions отдельно видно, работает ли сборка и прошли ли тесты.
+  # deploy ждёт оба — если тесты или typecheck упали, деплоя нет.
+  test:
+    # workflow_dispatch из других веток ничего не проверяет, не собирает и не деплоит
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: 'Setup: checkout'
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      # nuxi läuft über #!/usr/bin/env node -> Node >= 22 nötig (Nuxt 4)
-      - uses: actions/setup-node@v4
+      # nuxi запускается через #!/usr/bin/env node -> нужен Node >= 22 (Nuxt 4)
+      - name: 'Setup: Node 22'
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - uses: oven-sh/setup-bun@v2
+      # setup-bun@v2 кэширует только сам бинарник bun, кэша зависимостей у него нет
+      - name: 'Setup: Bun'
+        uses: oven-sh/setup-bun@v2
 
-      - run: bun install --frozen-lockfile
+      # Глобальный кэш загрузок bun (~/.bun/install/cache), не node_modules.
+      # Ключ меняется вместе с bun.lock; restore-keys берёт последний кэш для этой ОС,
+      # bun install докачивает только недостающие пакеты.
+      - name: 'Setup: Bun dependency cache'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
-      # Если тесты или typecheck падают — дальше не идём, деплоя нет
-      - run: bun run test
+      - name: 'Setup: install dependencies'
+        run: bun install --frozen-lockfile
 
-      - run: bunx nuxi typecheck
+      - name: Tests (vitest)
+        run: bun run test
 
-      - name: Generate (main)
+      - name: Type check (nuxi typecheck)
+        run: bunx nuxi typecheck
+
+  build:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: 'Setup: checkout'
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # nuxi запускается через #!/usr/bin/env node -> нужен Node >= 22 (Nuxt 4)
+      - name: 'Setup: Node 22'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # setup-bun@v2 кэширует только сам бинарник bun, кэша зависимостей у него нет
+      - name: 'Setup: Bun'
+        uses: oven-sh/setup-bun@v2
+
+      # Глобальный кэш загрузок bun (~/.bun/install/cache), не node_modules.
+      # Ключ меняется вместе с bun.lock; restore-keys берёт последний кэш для этой ОС,
+      # bun install докачивает только недостающие пакеты.
+      - name: 'Setup: Bun dependency cache'
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 'Setup: install dependencies'
+        run: bun install --frozen-lockfile
+
+      - name: Build (main)
         if: github.ref == 'refs/heads/main'
         run: bunx nuxi generate
         env:
           NITRO_PRESET: github_pages
           NUXT_APP_BASE_URL: /dianamatrix/
 
-      - name: Generate (develop)
+      - name: Build (develop)
         if: github.ref == 'refs/heads/develop'
         run: bunx nuxi generate
         env:
@@ -63,8 +117,10 @@ jobs:
           SITE_NOINDEX: 'true'
 
       # include-hidden-files: с upload-artifact v4.4 скрытые файлы исключаются, без него .nojekyll не попадёт в артефакт
-      # if-no-files-found: error — пустая сборка не должна дойти до деплоя с clean: true
-      - uses: actions/upload-artifact@v4
+      # if-no-files-found: error — если .output/public пуст или отсутствует, build падает сразу на upload с понятной ошибкой
+      # (без этого упал бы download-artifact в deploy; деплоя не было бы в любом случае)
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
         with:
           name: site
           path: .output/public
@@ -72,16 +128,18 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    needs: build
+    needs: [test, build]
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       # Нужен action'у деплоя для git; код проекта здесь не запускается
-      - uses: actions/checkout@v4
+      - name: 'Setup: checkout'
+        uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
+      - name: 'Setup: download site artifact'
+        uses: actions/download-artifact@v4
         with:
           name: site
           path: site
