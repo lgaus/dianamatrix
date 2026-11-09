@@ -1,0 +1,59 @@
+/* Дизайн-токены проекта: единственный источник цветов и шрифтов (см. PLAN.md, «Дизайн-значения»). */
+
+@theme {
+  /* Стандартная палитра Tailwind отключена: доступны только цвета ниже */
+  --color-*: initial;
+
+  /* Основные цвета */
+  --color-accent: #D1246B; /* акцент (фуксия) */
+  --color-ink: #2A1520; /* основной текст */
+  --color-ink-muted: #6E5563; /* вторичный текст */
+  --color-line: #F7E1EA; /* рамки */
+  --color-line-input: #F0CFDD; /* рамки полей ввода */
+  --color-page: #FFF6FA; /* фон страницы */
+  --color-surface: #FFFFFF; /* фон карточек, узлы матрицы, активный таб */
+  --color-cream: #F9E27D; /* сливочно-жёлтый */
+  --color-matrix-line: #C2387A; /* линии матрицы */
+  --color-photo-placeholder: #F8D9E6; /* круг-заглушка фото */
+
+  /* Аура за матрицей */
+  --color-aura-1: #FF8CC6;
+  --color-aura-2: #FFB3D9;
+  --color-aura-3: #E0B8FF;
+  --color-aura-base: #FFEAF3; /* фон под аурой */
+
+  /* Кольца узлов (чакры) */
+  --color-chakra-violet: #8B3DFF;
+  --color-chakra-blue: #2E6BFF;
+  --color-chakra-cyan: #00B2E8;
+  --color-chakra-green: #12B76A;
+  --color-chakra-yellow: #FFC400;
+  --color-chakra-orange: #FF8A00;
+  --color-chakra-red: #FF3355;
+
+  /*
+    Стандартные шрифты Tailwind (sans, serif, mono) отключены: в проекте только два шрифта ниже,
+    утилиты font-serif и font-mono не генерируются.
+    Preflight для code/kbd/samp/pre при отсутствии --font-mono берёт свой встроенный моноширинный стек.
+  */
+  --font-*: initial;
+
+  /* Шрифты: font-sans — текст по умолчанию (Nunito), font-display — заголовки, логотип, крупные цифры «Предназначения» (Comfortaa) */
+  --font-sans: "Nunito Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: "Comfortaa Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Межбуквенный интервал всех заголовков */
+  --tracking-heading: -0.045em;
+
+  /* Прозрачность зерна ауры (утилита opacity-grain) */
+  --opacity-grain: 0.1;
+}
+
+/*
+  Режим наложения зерна ауры.
+  В Tailwind v4 у mix-blend-mode нет namespace в @theme (утилиты mix-blend-* только фиксированные),
+  поэтому значение хранится обычной CSS-переменной и применяется классом [mix-blend-mode:var(--grain-blend-mode)].
+*/
+:root {
+  --grain-blend-mode: soft-light;
+}
