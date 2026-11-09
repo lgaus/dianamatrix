@@ -1,24 +1,37 @@
 name: Deploy to GitHub Pages
 
+# GitHub Pages: Source = "Deploy from a branch" -> gh-pages, / (root)
+# push в main    -> основной сайт  lgaus.github.io/dianamatrix/      (корень gh-pages, папка dev/ не трогается)
+# push в develop -> тестовый сайт  lgaus.github.io/dianamatrix/dev/  (только папка dev/ в gh-pages)
+
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
+# По умолчанию только чтение; право записи — только у job deploy
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
+# Отдельная группа на ветку: деплои одной ветки идут по очереди, main и develop — параллельно.
+# Это безопасно: main пишет только корень gh-pages (папка /dev/ защищена clean-exclude),
+# develop — только папку dev/. Файлы не пересекаются, поэтому при одновременном push
+# action с force: false делает fetch + rebase без конфликтов (attempt-limit по умолчанию 3).
 concurrency:
-  group: pages
+  group: gh-pages-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   build:
+    # workflow_dispatch из других веток ничего не собирает и не деплоит
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       # nuxi läuft über #!/usr/bin/env node -> Node >= 22 nötig (Nuxt 4)
       - uses: actions/setup-node@v4
@@ -29,21 +42,69 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - run: bunx nuxi generate
+      # Если тесты или typecheck падают — дальше не идём, деплоя нет
+      - run: bun run test
+
+      - run: bunx nuxi typecheck
+
+      - name: Generate (main)
+        if: github.ref == 'refs/heads/main'
+        run: bunx nuxi generate
         env:
           NITRO_PRESET: github_pages
           NUXT_APP_BASE_URL: /dianamatrix/
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Generate (develop)
+        if: github.ref == 'refs/heads/develop'
+        run: bunx nuxi generate
+        env:
+          NITRO_PRESET: github_pages
+          NUXT_APP_BASE_URL: /dianamatrix/dev/
+          SITE_NOINDEX: 'true'
+
+      # include-hidden-files: с upload-artifact v4.4 скрытые файлы исключаются, без него .nojekyll не попадёт в артефакт
+      # if-no-files-found: error — пустая сборка не должна дойти до деплоя с clean: true
+      - uses: actions/upload-artifact@v4
         with:
-          path: ./.output/public
+          name: site
+          path: .output/public
+          include-hidden-files: true
+          if-no-files-found: error
 
   deploy:
     needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write
     steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      # Нужен action'у деплоя для git; код проекта здесь не запускается
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+
+      # Корень gh-pages; /dev/ защищена от очистки (rsync filter "P /dev/")
+      - name: Deploy (main)
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
+        with:
+          branch: gh-pages
+          folder: site
+          clean: true
+          clean-exclude: |
+            /dev/
+          force: false
+
+      # Только папка dev/ в gh-pages; clean чистит только внутри dev/
+      - name: Deploy (develop)
+        if: github.ref == 'refs/heads/develop'
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
+        with:
+          branch: gh-pages
+          folder: site
+          target-folder: dev
+          clean: true
+          force: false
