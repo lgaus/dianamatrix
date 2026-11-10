@@ -37,6 +37,7 @@ const rootVariables = getDeclarations(getBlock(themeCss, ':root'))
 // Эталон — раздел «Дизайн-значения» PLAN.md
 const expectedColors: Record<string, string> = {
   'accent': '#D1246B',
+  'accent-hover': '#A11C52',
   'ink': '#2A1520',
   'ink-muted': '#6E5563',
   'line': '#F7E1EA',
@@ -58,6 +59,9 @@ const expectedColors: Record<string, string> = {
   'chakra-orange': '#FF8A00',
   'chakra-red': '#FF3355',
 }
+
+// Цвета, производные от других токенов (без своего hex)
+const derivedColors = ['shadow']
 
 // Первое семейство из списка font-family, без кавычек
 const firstFontFamily = (value: string | undefined): string =>
@@ -84,7 +88,13 @@ describe('theme.css: colors', () => {
       .filter(name => name.startsWith('--color-') && name !== '--color-*')
       .map(name => name.slice('--color-'.length))
       .sort()
-    expect(colorTokens).toEqual(Object.keys(expectedColors).sort())
+    expect(colorTokens).toEqual([...Object.keys(expectedColors), ...derivedColors].sort())
+  })
+
+  // Цвет тени — не отдельный hex, а ink с прозрачностью в процентах
+  it('--color-shadow is ink with transparency', () => {
+    expect(themeTokens.get('--color-shadow'))
+      .toMatch(/^color-mix\(in \w+,\s*var\(--color-ink\)\s+\d+(\.\d+)?%,\s*transparent\)$/)
   })
 
   it('has no hex colors outside color tokens', () => {
@@ -126,6 +136,46 @@ describe('theme.css: fonts and effects', () => {
     expect(Number(themeTokens.get('--opacity-grain'))).toBe(0.1)
   })
 
+  // Модификатор цвета bg-accent-hover/tint: Tailwind подставляет значение в color-mix(), поэтому оно в процентах
+  it('--opacity-tint is 10% (percent, for color-mix)', () => {
+    expect(themeTokens.get('--opacity-tint')).toBe('10%')
+  })
+
+  // Модификатор цвета border-accent-hover/tint-border (затемнённая рамка кнопок с фоном), тоже в процентах
+  it('--opacity-tint-border is 25% (percent, for color-mix)', () => {
+    expect(themeTokens.get('--opacity-tint-border')).toBe('25%')
+  })
+
+  it('has only --opacity-grain, --opacity-tint and --opacity-tint-border opacity tokens', () => {
+    const opacityTokens = [...themeTokens.keys()]
+      .filter(name => name.startsWith('--opacity-'))
+      .sort()
+    expect(opacityTokens).toEqual(['--opacity-grain', '--opacity-tint', '--opacity-tint-border'])
+  })
+
+  it('--shadow-menu is the only shadow token and uses the shadow color', () => {
+    const shadowTokens = [...themeTokens.keys()].filter(name => name.startsWith('--shadow-'))
+    expect(shadowTokens).toEqual(['--shadow-menu'])
+    expect(themeTokens.get('--shadow-menu')).toMatch(/var\(--color-shadow\)$/)
+  })
+
+  it('--breakpoint-xs is 30rem (480 px), the only custom breakpoint', () => {
+    const breakpointTokens = [...themeTokens.keys()].filter(name => name.startsWith('--breakpoint-'))
+    expect(breakpointTokens).toEqual(['--breakpoint-xs'])
+    expect(themeTokens.get('--breakpoint-xs')).toBe('30rem')
+  })
+
+  it('--radius-block is 28px, --radius-card is 20px, --radius-arch is 50%', () => {
+    expect(themeTokens.get('--radius-block')).toBe('28px')
+    expect(themeTokens.get('--radius-card')).toBe('20px')
+    expect(themeTokens.get('--radius-arch')).toBe('50%')
+  })
+
+  it('--text-logo is 19px, --text-nav is 15px', () => {
+    expect(themeTokens.get('--text-logo')).toBe('19px')
+    expect(themeTokens.get('--text-nav')).toBe('15px')
+  })
+
   it('--grain-blend-mode is soft-light', () => {
     expect(rootVariables.get('--grain-blend-mode')).toBe('soft-light')
   })
@@ -154,5 +204,21 @@ describe('main.css: entry point', () => {
     // Убираем начальную серию @import; дальше @import встречаться не должен
     const afterLeadingImports = mainCss.replace(/^(\s*@import[^;]+;)+/, '')
     expect(afterLeadingImports).not.toMatch(/@import/)
+  })
+})
+
+describe('main.css: html base styles (step 5)', () => {
+  // Блок html { ... } внутри @layer base (getBlock ищет блок без вложенных)
+  const htmlDeclarations = new Map(
+    [...getBlock(mainCss, 'html').matchAll(/([\w-]+)\s*:\s*([^;]+);/g)]
+      .map(([, name, value]) => [name ?? '', (value ?? '').trim()]),
+  )
+
+  it('reserves the scrollbar gutter (header does not shift between / and /about)', () => {
+    expect(htmlDeclarations.get('scrollbar-gutter')).toBe('stable')
+  })
+
+  it('page background is the page token (gutter of a short page is not white)', () => {
+    expect(htmlDeclarations.get('background-color')).toBe('var(--color-page)')
   })
 })

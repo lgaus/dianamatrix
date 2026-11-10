@@ -14,6 +14,13 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/main.css'],
+  // GitHub Pages отдаёт только существующие файлы (404.html — один, в корне, у прод-сборки).
+  // Чтобы прямой заход на /about работал на обоих сайтах, generate создаёт about/index.html.
+  nitro: {
+    prerender: {
+      routes: ['/about'],
+    },
+  },
   vite: {
     plugins: [tailwindcss()],
   },

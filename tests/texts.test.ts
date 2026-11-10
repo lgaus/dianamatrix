@@ -28,9 +28,10 @@ const collectStrings = (value: unknown, path = ''): Array<[string, unknown]> => 
 const stringPaths = [
   'header.logo',
   'header.tagline',
-  'header.nav.calculator',
   'header.nav.about',
   'header.cta',
+  'header.ctaShort',
+  'header.backToHome',
   'form.badge',
   'form.title',
   'form.description',
