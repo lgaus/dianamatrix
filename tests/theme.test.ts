@@ -151,11 +151,27 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--opacity-disabled')).toMatch(/^\d+%$/)
   })
 
-  it('has only --opacity-disabled, --opacity-grain, --opacity-tint and --opacity-tint-border opacity tokens', () => {
+  // Модификаторы цвета линий схемы матрицы: stroke-matrix-line/matrix-edge (контур) и /matrix-axis (оси), в процентах
+  it('--opacity-matrix-edge and --opacity-matrix-axis are percents, edge more opaque than axis', () => {
+    const edge = themeTokens.get('--opacity-matrix-edge') ?? ''
+    const axis = themeTokens.get('--opacity-matrix-axis') ?? ''
+    expect(edge).toMatch(/^\d+%$/)
+    expect(axis).toMatch(/^\d+%$/)
+    expect(Number.parseFloat(edge)).toBeGreaterThan(Number.parseFloat(axis))
+  })
+
+  it('has only the known opacity tokens', () => {
     const opacityTokens = [...themeTokens.keys()]
       .filter(name => name.startsWith('--opacity-'))
       .sort()
-    expect(opacityTokens).toEqual(['--opacity-disabled', '--opacity-grain', '--opacity-tint', '--opacity-tint-border'])
+    expect(opacityTokens).toEqual([
+      '--opacity-disabled',
+      '--opacity-grain',
+      '--opacity-matrix-axis',
+      '--opacity-matrix-edge',
+      '--opacity-tint',
+      '--opacity-tint-border',
+    ])
   })
 
   it('--shadow-menu is the only shadow token and uses the shadow color', () => {
@@ -179,6 +195,11 @@ describe('theme.css: fonts and effects', () => {
   it('--text-logo is 19px, --text-nav is 15px', () => {
     expect(themeTokens.get('--text-logo')).toBe('19px')
     expect(themeTokens.get('--text-nav')).toBe('15px')
+  })
+
+  // Подпись схемы на телефоне 13 px; в rem, чтобы росла с размером шрифта браузера
+  it('--text-caption-sm is 13px in rem', () => {
+    expect(themeTokens.get('--text-caption-sm')).toBe('0.8125rem')
   })
 
   it('--grain-blend-mode is soft-light', () => {

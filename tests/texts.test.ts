@@ -40,6 +40,8 @@ const stringPaths = [
   'form.nameLabel',
   'form.birthDateLabel',
   'form.submit',
+  'matrix.chartLabel',
+  'matrix.emptyValue',
   'healthMap.number',
   'healthMap.title',
   'healthMap.subtitle',

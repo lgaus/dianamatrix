@@ -76,6 +76,13 @@
   */
   --opacity-disabled: 60%;
 
+  /*
+    Прозрачность линий схемы матрицы (цвет matrix-line): контур ромба и квадрата — модификатор
+    stroke-matrix-line/matrix-edge, оси и диагонали через центр — stroke-matrix-line/matrix-axis
+  */
+  --opacity-matrix-edge: 70%;
+  --opacity-matrix-axis: 40%;
+
   /* Тень выпадающего меню (shadow-menu): мягкая, отделяет панель от белой карточки под ней */
   --shadow-menu: 0 8px 24px -4px var(--color-shadow);
 
@@ -111,6 +118,12 @@
   --text-title-sm--line-height: 1.15;
   --text-field: 17px; /* текст полей и кнопки «Рассчитать» на компьютере (text-field) */
   --text-badge-sm: 13px; /* наклейка формы на телефоне (text-badge-sm) */
+
+  /*
+    Подпись под схемой матрицы на телефоне (text-caption-sm, 13 px); на компьютере — text-sm.
+    В rem, как text-sm: подпись растёт вместе с размером шрифта браузера
+  */
+  --text-caption-sm: 0.8125rem;
 }
 
 /*
@@ -120,4 +133,12 @@
 */
 :root {
   --grain-blend-mode: soft-light;
+}
+
+/*
+  Перелом lg (стандартное значение Tailwind) объявлен static, чтобы переменная попала в CSS и её читал JS:
+  от lg схема рядом с формой — после «Рассчитать» страница не прокручивается (CalculatorForm)
+*/
+@theme static {
+  --breakpoint-lg: 64rem;
 }
