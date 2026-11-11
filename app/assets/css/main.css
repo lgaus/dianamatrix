@@ -1,1 +1,23 @@
+/* Точка входа стилей. Все @import должны стоять до остальных правил. */
 @import "tailwindcss";
+
+/* Шрифты (Fontsource, variable-версии; кириллица и латиница подгружаются по unicode-range) */
+@import "@fontsource-variable/comfortaa";
+@import "@fontsource-variable/nunito";
+
+/* Дизайн-токены */
+@import "./theme.css";
+
+/*
+  Базовые стили документа.
+  scrollbar-gutter: место под полосу прокрутки резервируется всегда,
+  поэтому шапка и контейнер не сдвигаются при переходе между длинной и короткой страницей
+  (браузеры с классическими полосами прокрутки, например Chrome и Firefox на Windows).
+  Фон страницы — у html: иначе пустое место под полосу на короткой странице было бы белым.
+*/
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+    background-color: var(--color-page);
+  }
+}

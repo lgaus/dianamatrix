@@ -1,0 +1,123 @@
+/* Дизайн-токены проекта: единственный источник цветов и шрифтов (см. PLAN.md, «Дизайн-значения»). */
+
+@theme {
+  /* Стандартная палитра Tailwind отключена: доступны только цвета ниже */
+  --color-*: initial;
+
+  /* Основные цвета */
+  --color-accent: #D1246B; /* акцент (фуксия) */
+  --color-accent-hover: #A11C52; /* наведение на элементы с фуксией; полупрозрачный — фон наведения кнопок с фоном */
+  --color-ink: #2A1520; /* основной текст */
+  --color-ink-muted: #6E5563; /* вторичный текст */
+  --color-line: #F7E1EA; /* рамки */
+  --color-line-input: #F0CFDD; /* рамки полей ввода */
+  --color-page: #FFF6FA; /* фон страницы */
+  --color-surface: #FFFFFF; /* фон карточек, узлы матрицы, активный таб */
+  --color-cream: #F9E27D; /* сливочно-жёлтый */
+  --color-matrix-line: #C2387A; /* линии матрицы */
+  --color-photo-placeholder: #F8D9E6; /* круг-заглушка фото */
+  --color-shadow: color-mix(in srgb, var(--color-ink) 12%, transparent); /* цвет тени: ink с малой прозрачностью */
+  /*
+    Кнопки с фоном accent при наведении и нажатии: accent под слоем тёмной фуксии (accent-hover) 40 %, итог ≈ #BE2161.
+    Готовый смешанный цвет, а не полупрозрачный слой: прозрачный фон кнопки показал бы белую карточку под ней.
+    Контраст белого текста: на accent ≈ 5.0:1, на accent-shaded ≈ 5.9:1
+  */
+  --color-accent-shaded: color-mix(in srgb, var(--color-accent-hover) 40%, var(--color-accent));
+
+  /* Аура за матрицей */
+  --color-aura-1: #FF8CC6;
+  --color-aura-2: #FFB3D9;
+  --color-aura-3: #E0B8FF;
+  --color-aura-base: #FFEAF3; /* фон под аурой */
+
+  /* Кольца узлов (чакры) */
+  --color-chakra-violet: #8B3DFF;
+  --color-chakra-blue: #2E6BFF;
+  --color-chakra-cyan: #00B2E8;
+  --color-chakra-green: #12B76A;
+  --color-chakra-yellow: #FFC400;
+  --color-chakra-orange: #FF8A00;
+  --color-chakra-red: #FF3355;
+
+  /*
+    Стандартные шрифты Tailwind (sans, serif, mono) отключены: в проекте только два шрифта ниже,
+    утилиты font-serif и font-mono не генерируются.
+    Preflight для code/kbd/samp/pre при отсутствии --font-mono берёт свой встроенный моноширинный стек.
+  */
+  --font-*: initial;
+
+  /* Шрифты: font-sans — текст по умолчанию (Nunito), font-display — заголовки, логотип, крупные цифры «Предназначения» (Comfortaa) */
+  --font-sans: "Nunito Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: "Comfortaa Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Межбуквенный интервал всех заголовков */
+  --tracking-heading: -0.045em;
+
+  /* Прозрачность зерна ауры (утилита opacity-grain) */
+  --opacity-grain: 0.1;
+
+  /*
+    Прозрачность подкраски фона при наведении и нажатии у кнопок с фоном и строк меню:
+    модификатор цвета bg-accent-hover/tint (в процентах — так его ждёт color-mix у Tailwind)
+  */
+  --opacity-tint: 10%;
+
+  /*
+    Прозрачность рамки кнопок с фоном при наведении, нажатии и в состоянии «нажата» (бургер при открытом меню):
+    модификатор border-accent-hover/tint-border. Рамка line почти совпадает по цвету с подкрашенным фоном
+    и сливается с ним; рамка той же тёмной фуксии, но плотнее подкраски, остаётся видна на любом фоне
+  */
+  --opacity-tint-border: 25%;
+
+  /*
+    Прозрачность текста неактивных кнопок с фоном («Рассчитать», «Подтвердить» в календаре): модификатор
+    text-ink-muted/disabled на фоне line. Текст заметно светлее активного, но читается: контраст около 2.5:1
+    (WCAG 1.4.3 для неактивных элементов контраст не требует)
+  */
+  --opacity-disabled: 60%;
+
+  /* Тень выпадающего меню (shadow-menu): мягкая, отделяет панель от белой карточки под ней */
+  --shadow-menu: 0 8px 24px -4px var(--color-shadow);
+
+  /*
+    Перелом xs (480 px, в rem как стандартные переломы Tailwind): ниже него на /about — короткий текст кнопки записи.
+    Подобран по стресс-проверке (тексты длиннее в 1,5 раза): полный текст помещается с зазором ≥ 8 px до логотипа
+    и с классической полосой прокрутки (место под неё резервирует scrollbar-gutter в main.css)
+  */
+  --breakpoint-xs: 30rem;
+
+  /* Скругления из макета вне стандартной шкалы Tailwind */
+  --radius-block: 28px; /* крупные блоки на компьютере (rounded-block) */
+  --radius-card: 20px; /* карточки (rounded-card) */
+  /*
+    Верх арки логотипа (rounded-t-arch): 50 % — полукруг от размера бокса.
+    С rounded-t-full сумма радиусов больше стороны, браузер пропорционально уменьшает все радиусы и нижние (rounded-b-md) становятся ~0
+  */
+  --radius-arch: 50%;
+  --radius-field: 14px; /* поля ввода, кнопка «Рассчитать», подложка табов формы (rounded-field) */
+  --radius-tab: 10px; /* активный таб формы, кнопки и селекты календаря (rounded-tab) */
+
+  /*
+    Размеры шрифтов шапки из макета вне стандартной шкалы Tailwind.
+    Line-height не задаётся (нет --text-*--line-height): наследуется от страницы.
+  */
+  --text-logo: 19px; /* логотип (text-logo) */
+  --text-nav: 15px; /* ссылки и кнопка шапки (text-nav), табы формы */
+
+  /* Размеры шрифтов формы из макета вне стандартной шкалы Tailwind */
+  --text-title: 38px; /* заголовок формы на компьютере (text-title) */
+  --text-title--line-height: 1.15; /* по наложению на макет: межстрочие заголовка ≈ 1.15 */
+  --text-title-sm: 28px; /* заголовок формы на телефоне (text-title-sm) */
+  --text-title-sm--line-height: 1.15;
+  --text-field: 17px; /* текст полей и кнопки «Рассчитать» на компьютере (text-field) */
+  --text-badge-sm: 13px; /* наклейка формы на телефоне (text-badge-sm) */
+}
+
+/*
+  Режим наложения зерна ауры.
+  В Tailwind v4 у mix-blend-mode нет namespace в @theme (утилиты mix-blend-* только фиксированные),
+  поэтому значение хранится обычной CSS-переменной и применяется классом [mix-blend-mode:var(--grain-blend-mode)].
+*/
+:root {
+  --grain-blend-mode: soft-light;
+}
