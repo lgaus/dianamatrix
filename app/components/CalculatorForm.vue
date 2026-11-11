@@ -5,6 +5,7 @@ import type { BirthDate } from '~/utils/matrix/types'
 import { type BirthDateError, MIN_BIRTH_DATE, parseBirthDate, toBirthDate } from '~/utils/date/birthDate'
 import type DateField from './DateField.vue'
 import { type FormTab, formTabId } from './FormTabs.vue'
+import { MATRIX_CHART_ID } from './MatrixChart.vue'
 
 // Форма расчёта: наклейка, заголовок, описание (компьютер), табы режима, имя, дата рождения, кнопка «Рассчитать».
 // При правильной дате отправляет submit с именем (без пробелов по краям; пустое — undefined) и датой.
@@ -76,6 +77,21 @@ const onSubmit = () => {
     return
   }
   emit('submit', { name: name.value.trim() || undefined, birthDate: result.date })
+  revealMatrix()
+}
+
+// После расчёта на телефоне и планшете (схема под формой) страница всегда прокручивается так, чтобы схема встала
+// по центру области под шапкой (block: 'center' учитывает scroll-padding у html: сверху шапка, снизу зазор).
+// Схема выше этой области — верх схемы сразу под шапкой (block: 'start'), иначе центр увёл бы её верх под шапку.
+// От перелома lg (--breakpoint-lg из темы) схема рядом с формой — прокрутки нет никогда, даже если схема выше окна.
+// Плавно; при prefers-reduced-motion — сразу
+const revealMatrix = () => {
+  const root = getComputedStyle(document.documentElement)
+  const matrix = document.getElementById(MATRIX_CHART_ID)
+  if (!matrix || window.matchMedia(`(width >= ${root.getPropertyValue('--breakpoint-lg')})`).matches) return
+  const area = window.innerHeight - parseFloat(root.scrollPaddingTop) - parseFloat(root.scrollPaddingBottom)
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  matrix.scrollIntoView({ block: matrix.offsetHeight > area ? 'start' : 'center', behavior: reduceMotion ? 'instant' : 'smooth' })
 }
 
 // Неактивная «Рассчитать» — aria-disabled, а не disabled: кнопка остаётся в порядке Tab и экранный диктор
