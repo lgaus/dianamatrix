@@ -119,15 +119,15 @@ export const texts = {
       spiritual: 'после 60',
       planetary: 'всю жизнь',
     },
-    // Строки формул под крупной цифрой карточки
+    // Строки формул рядом с крупным числом; до расчёта вместо чисел — matrix.emptyValue
     formulas: {
-      personal: (sky: number, earth: number) =>
+      personal: (sky: number | string, earth: number | string) =>
         `${purposeTerms.sky} ${sky} + ${purposeTerms.earth} ${earth}`,
-      social: (male: number, female: number) =>
+      social: (male: number | string, female: number | string) =>
         `${purposeTerms.male} ${male} + ${purposeTerms.female} ${female}`,
-      spiritual: (personal: number, social: number) =>
+      spiritual: (personal: number | string, social: number | string) =>
         `${purposeTerms.personal} ${personal} + ${purposeTerms.social} ${social}`,
-      planetary: (social: number, spiritual: number) =>
+      planetary: (social: number | string, spiritual: number | string) =>
         `${purposeTerms.social} ${social} + ${purposeTerms.spiritual} ${spiritual}`,
     },
   },
