@@ -7,8 +7,9 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
 import AppHeader from '~/components/AppHeader.vue'
 import HeaderMenu from '~/components/HeaderMenu.vue'
+import { inkTextFeedbackClass, interactiveClass, outerFocusClass } from '~/config/feedback'
 
-// Адреса ссылок навигации шапки (включая ссылки в скрытом меню бургера; логотип — всегда на /, не учитывается)
+// Адреса ссылок навигации шапки (включая ссылки в скрытом меню бургера; логотип-ссылка на / на /about не учитывается)
 const getHrefs = (wrapper: VueWrapper): string[] =>
   wrapper.findAll('a:not([data-testid="header-logo"])').map(link => link.attributes('href') ?? '')
 
@@ -82,15 +83,24 @@ describe('AppHeader: route navigation', () => {
     expect(wrapper.find('[data-testid="header-menu-button"]').exists()).toBe(true)
   })
 
-  it('logo on home links to /, accessible name is logo text, arch without arrow', async () => {
+  it('logo on home is plain site title: not a link, not focusable, no feedback classes, arch without arrow', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const logo = wrapper.get('[data-testid="header-logo"]')
 
-    expect(logo.element.tagName).toBe('A')
-    expect(logo.attributes('href')).toBe('/')
-    expect(logo.attributes('aria-label')).toBeUndefined()
+    expect(logo.element.tagName).not.toBe('A')
+    expect(logo.attributes('href')).toBeUndefined()
+    expect(logo.attributes('tabindex')).toBeUndefined()
+    expect(logo.find('a, button, [tabindex]').exists()).toBe(false)
+    expect(logo.classes().some(name => /^(hover|active|focus-visible):/.test(name))).toBe(false)
     expect(logo.text().trim()).toBeTruthy()
     expect(wrapper.find('[data-testid="header-back-arrow"]').exists()).toBe(false)
+  })
+
+  it('logo on /about keeps hover/press and focus classes', async () => {
+    const wrapper = await mountSuspended(AppHeader, { route: '/about' })
+    const expected = [interactiveClass, outerFocusClass, inkTextFeedbackClass].flatMap(value => value.split(' '))
+
+    expect(wrapper.get('[data-testid="header-logo"]').classes()).toEqual(expect.arrayContaining(expected))
   })
 
   it('logo on /about links to / with arrow; accessible name is hidden text plus visible logo text', async () => {
@@ -252,7 +262,7 @@ describe('AppHeader: hide on scroll', () => {
     await scrollWindowTo(400)
     expect(isHeaderShiftedUp(wrapper)).toBe(true)
 
-    await wrapper.get('[data-testid="header-logo"]').trigger('focusin')
+    await wrapper.get('[data-testid="header-menu-button"]').trigger('focusin')
     expect(isHeaderShiftedUp(wrapper)).toBe(false)
     wrapper.unmount()
   })

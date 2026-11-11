@@ -13,6 +13,7 @@ import {
 // Шапка сайта: логотип, навигация (с md) и бургер-меню (ниже md, компонент HeaderMenu).
 // Закреплена сверху; на телефоне прячется при прокрутке вниз и появляется при прокрутке вверх.
 const route = useRoute()
+const NuxtLink = resolveComponent('NuxtLink')
 
 // На /about вместо арки логотипа — стрелка «назад», ссылки «Обо мне» нет,
 // бургера нет: кнопка записи видна в шапке на всех ширинах
@@ -46,11 +47,14 @@ watch(isMenuOpen, (isOpen) => {
     <div class="mx-auto flex max-w-6xl items-center justify-between py-2 md:py-4">
       <!-- Логотип: арка-заглушка фото (на /about — стрелка «назад» в том же боксе), имя, подпись (с md) -->
       <div class="flex items-center gap-2.5 md:gap-3">
-        <!-- Доступное имя: на главной — текст логотипа, на /about — скрытый текст «На главную» + текст логотипа -->
-        <NuxtLink
-          to="/"
+        <!-- На главной логотип — просто название сайта: не ссылка, без фокуса и отклика.
+             На /about — ссылка «назад» на главную; доступное имя — скрытый текст «На главную» + текст логотипа.
+             Бокс и отступы одинаковые, поэтому при переходе шапка не сдвигается -->
+        <component
+          :is="isAboutPage ? NuxtLink : 'div'"
+          v-bind="isAboutPage ? { to: '/' } : {}"
           class="flex items-center gap-2.5 rounded-md text-ink md:gap-3"
-          :class="[interactiveClass, outerFocusClass, inkTextFeedbackClass]"
+          :class="isAboutPage ? [interactiveClass, outerFocusClass, inkTextFeedbackClass] : []"
           data-testid="header-logo"
         >
           <span
@@ -87,7 +91,7 @@ watch(isMenuOpen, (isOpen) => {
           <span class="font-display text-logo font-bold tracking-heading">
             {{ texts.header.logo }}
           </span>
-        </NuxtLink>
+        </component>
         <span class="hidden items-center gap-1 text-sm text-ink-muted md:flex">
           <!-- Разделитель-точка перед подписью -->
           <span
