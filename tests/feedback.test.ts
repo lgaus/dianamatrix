@@ -11,14 +11,14 @@ const pointerSets = Object.entries(feedback)
   .filter(([, value]) => classesOf(value).some(name => name.startsWith('hover:') || name.startsWith('active:')))
 
 describe('feedback.ts', () => {
-  it('все экспорты — непустые строки классов', () => {
+  it('all exports are non-empty class strings', () => {
     for (const [name, value] of Object.entries(feedback)) {
       expect(typeof value, name).toBe('string')
       expect(classesOf(value).length, name).toBeGreaterThan(0)
     }
   })
 
-  it('каждому hover: соответствует такой же active: (отклик и на тач-устройствах)', () => {
+  it('every hover: has a matching active: (feedback on touch devices too)', () => {
     expect(pointerSets.length).toBeGreaterThan(0)
     for (const [name, value] of pointerSets) {
       const classes = classesOf(value)
@@ -28,7 +28,7 @@ describe('feedback.ts', () => {
     }
   })
 
-  it('interactiveClass: плавно только цвет, фон, рамка и масштаб; outline не анимируется', () => {
+  it('interactiveClass: transitions only color, background, border and scale; outline not animated', () => {
     const classes = classesOf(feedback.interactiveClass)
     const transition = classes.find(c => c.startsWith('transition'))
     const match = /^transition-\[(.+)\]$/.exec(transition ?? '')
@@ -38,7 +38,7 @@ describe('feedback.ts', () => {
     expect(properties.some(p => p.startsWith('outline'))).toBe(false)
   })
 
-  it('interactiveClass: 150 мс, без анимации при reduced motion, видимый фокус цвета акцента', () => {
+  it('interactiveClass: 150 ms, no animation with reduced motion, accent-colored focus ring', () => {
     const classes = classesOf(feedback.interactiveClass)
     expect(classes).toContain('duration-150')
     expect(classes).toContain('motion-reduce:transition-none')
@@ -46,19 +46,19 @@ describe('feedback.ts', () => {
     expect(classes).toContain('focus-visible:outline-accent')
   })
 
-  it('pressClass: масштаб при нажатии только без reduced motion', () => {
+  it('pressClass: press scale only without reduced motion', () => {
     const scale = classesOf(feedback.pressClass).filter(c => c.includes('scale-'))
     expect(scale.length).toBeGreaterThan(0)
     for (const name of scale) expect(name.startsWith('motion-safe:active:')).toBe(true)
   })
 
-  it('состояние «нажата» = те же фон и рамка, что при наведении (без префиксов)', () => {
+  it('pressed state = same background and border as hover (without prefixes)', () => {
     const strip = (value: string) => classesOf(value).filter(c => c.startsWith('hover:')).map(c => c.slice('hover:'.length))
     const expected = [...strip(feedback.tintFeedbackClass), ...strip(feedback.tintBorderFeedbackClass)].sort()
     expect(classesOf(feedback.tintPressedClass).sort()).toEqual(expected)
   })
 
-  it('подкраска фона и рамки — тёмная фуксия с токенами прозрачности tint и tint-border', () => {
+  it('background and border tint: dark fuchsia with tint and tint-border opacity tokens', () => {
     expect(classesOf(feedback.tintFeedbackClass)).toContain('hover:bg-accent-hover/tint')
     expect(classesOf(feedback.tintBorderFeedbackClass)).toContain('hover:border-accent-hover/tint-border')
   })

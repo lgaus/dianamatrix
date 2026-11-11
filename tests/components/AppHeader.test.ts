@@ -12,8 +12,8 @@ import HeaderMenu from '~/components/HeaderMenu.vue'
 const getHrefs = (wrapper: VueWrapper): string[] =>
   wrapper.findAll('a:not([data-testid="header-logo"])').map(link => link.attributes('href') ?? '')
 
-describe('AppHeader: навигация по маршруту', () => {
-  it('на главной есть ссылка на /about и нет ссылки на /', async () => {
+describe('AppHeader: route navigation', () => {
+  it('home page has a link to /about and no link to /', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const hrefs = getHrefs(wrapper)
 
@@ -22,7 +22,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(hrefs).not.toContain('/')
   })
 
-  it('на /about нет навигационных ссылок (только логотип и кнопки записи)', async () => {
+  it('on /about no nav links (only logo and booking buttons)', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/about' })
 
     expect(wrapper.find('[data-testid="header-nav-link"]').exists()).toBe(false)
@@ -32,7 +32,7 @@ describe('AppHeader: навигация по маршруту', () => {
   it.each([
     ['/', ['header-cta', 'header-menu-cta']],
     ['/about', ['header-cta']],
-  ])('кнопки записи — button без адреса (маршрут %s)', async (route, testIds) => {
+  ])('booking buttons are buttons without href (route %s)', async (route, testIds) => {
     const wrapper = await mountSuspended(AppHeader, { route })
 
     for (const testId of testIds) {
@@ -43,7 +43,7 @@ describe('AppHeader: навигация по маршруту', () => {
     }
   })
 
-  it('на /about нет бургера и меню, кнопка записи видна на всех ширинах (без hidden)', async () => {
+  it('on /about no burger or menu; booking button visible at all widths (no hidden)', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/about' })
     const ctaNav = wrapper.get('[data-testid="header-cta"]').element.closest('nav')
 
@@ -53,7 +53,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(ctaNav?.classList.contains('hidden')).toBe(false)
   })
 
-  it('бургер — компонент HeaderMenu: на главной есть, на /about нет', async () => {
+  it('burger is the HeaderMenu component: present on home, absent on /about', async () => {
     const home = await mountSuspended(AppHeader, { route: '/' })
     expect(home.findComponent(HeaderMenu).exists()).toBe(true)
     home.unmount()
@@ -62,7 +62,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(about.findComponent(HeaderMenu).exists()).toBe(false)
   })
 
-  it('кнопка записи в шапке: короткий и полный текст непустые, показываются по разные стороны перелома xs', async () => {
+  it('header booking button: short and full texts non-empty, shown on opposite sides of the xs breakpoint', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/about' })
     const short = wrapper.get('[data-testid="header-cta"] [data-testid="header-cta-short"]')
     const full = wrapper.get('[data-testid="header-cta"] [data-testid="header-cta-full"]')
@@ -74,7 +74,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(full.classes()).toContain('max-xs:hidden')
   })
 
-  it('на главной кнопка записи в шапке скрыта ниже md (там бургер)', async () => {
+  it('on home, header booking button hidden below md (burger there)', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const ctaNav = wrapper.get('[data-testid="header-cta"]').element.closest('nav')
 
@@ -82,7 +82,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(wrapper.find('[data-testid="header-menu-button"]').exists()).toBe(true)
   })
 
-  it('логотип на главной — ссылка на /, доступное имя — текст логотипа, арка без стрелки', async () => {
+  it('logo on home links to /, accessible name is logo text, arch without arrow', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const logo = wrapper.get('[data-testid="header-logo"]')
 
@@ -93,7 +93,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(wrapper.find('[data-testid="header-back-arrow"]').exists()).toBe(false)
   })
 
-  it('логотип на /about — ссылка на / со стрелкой; доступное имя — скрытый текст плюс видимый текст логотипа', async () => {
+  it('logo on /about links to / with arrow; accessible name is hidden text plus visible logo text', async () => {
     // Видимый текст логотипа — как на главной (роутер общий, поэтому главная монтируется и снимается первой)
     const home = await mountSuspended(AppHeader, { route: '/' })
     const visibleText = home.get('[data-testid="header-logo"]').text().trim()
@@ -115,7 +115,7 @@ describe('AppHeader: навигация по маршруту', () => {
     expect(logo.text().replace(/\s+/g, ' ').trim()).toBe(`${backLabel.text().trim()} ${visibleText}`)
   })
 
-  it('в меню бургера те же ссылки и кнопки, что и в навигации (главная)', async () => {
+  it('burger menu has the same links and buttons as the nav (home)', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const describeItems = (selector: string): string[] =>
       wrapper.findAll(selector).map(item => `${item.element.tagName}:${item.attributes('href') ?? ''}`)
@@ -128,8 +128,8 @@ describe('AppHeader: навигация по маршруту', () => {
 // Меню скрывается через v-show (display: none); isVisible() без монтирования в document ненадёжен
 const isShown = (element: Element): boolean => (element as HTMLElement).style.display !== 'none'
 
-describe('AppHeader: бургер', () => {
-  it('кнопка связана с меню, у неё есть aria-label', async () => {
+describe('AppHeader: burger', () => {
+  it('button is linked to the menu and has aria-label', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const button = wrapper.get('[data-testid="header-menu-button"]')
     const menu = wrapper.get('[data-testid="header-menu"]')
@@ -140,7 +140,7 @@ describe('AppHeader: бургер', () => {
     expect(button.attributes('aria-controls')).toBe(menu.attributes('id'))
   })
 
-  it('клик переключает aria-expanded и видимость меню', async () => {
+  it('click toggles aria-expanded and menu visibility', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const button = wrapper.get('[data-testid="header-menu-button"]')
     const menu = wrapper.get('[data-testid="header-menu"]')
@@ -157,7 +157,7 @@ describe('AppHeader: бургер', () => {
     expect(isShown(menu.element)).toBe(false)
   })
 
-  it('открытое меню: иконка кнопки меняется, фон кнопки подкрашен', async () => {
+  it('open menu: button icon changes, button background tinted', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const button = wrapper.get('[data-testid="header-menu-button"]')
     const iconOf = (): string | undefined => wrapper.get('[data-testid="header-menu-icon"]').attributes('data-icon')
@@ -173,7 +173,7 @@ describe('AppHeader: бургер', () => {
     expect(button.classes()).toEqual(closedClasses)
   })
 
-  it('клик по ссылке меню закрывает меню', async () => {
+  it('menu link click closes the menu', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const button = wrapper.get('[data-testid="header-menu-button"]')
 
@@ -198,12 +198,12 @@ const scrollWindowTo = async (y: number): Promise<void> => {
 const isHeaderShiftedUp = (wrapper: VueWrapper): boolean =>
   wrapper.get('[data-testid="app-header"]').classes().some(name => name.includes('-translate-y-full'))
 
-describe('AppHeader: скрытие при прокрутке', () => {
+describe('AppHeader: hide on scroll', () => {
   afterEach(async () => {
     await scrollWindowTo(0)
   })
 
-  it('шапка закреплена сверху', async () => {
+  it('header is pinned to the top', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const classes = wrapper.get('[data-testid="app-header"]').classes()
 
@@ -212,7 +212,7 @@ describe('AppHeader: скрытие при прокрутке', () => {
     wrapper.unmount()
   })
 
-  it('прячется при прокрутке вниз и показывается при прокрутке вверх', async () => {
+  it('hides on scroll down and shows on scroll up', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
 
     expect(isHeaderShiftedUp(wrapper)).toBe(false)
@@ -223,7 +223,7 @@ describe('AppHeader: скрытие при прокрутке', () => {
     wrapper.unmount()
   })
 
-  it('при открытом меню не прячется', async () => {
+  it('does not hide while the menu is open', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
 
     await wrapper.get('[data-testid="header-menu-button"]').trigger('click')
@@ -232,7 +232,7 @@ describe('AppHeader: скрытие при прокрутке', () => {
     wrapper.unmount()
   })
 
-  it('после закрытия меню остаётся видимой до следующей прокрутки вниз', async () => {
+  it('after menu closes, stays visible until the next scroll down', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
     const button = wrapper.get('[data-testid="header-menu-button"]')
 
@@ -246,7 +246,7 @@ describe('AppHeader: скрытие при прокрутке', () => {
     wrapper.unmount()
   })
 
-  it('фокус внутри скрытой шапки показывает её', async () => {
+  it('focus inside the hidden header reveals it', async () => {
     const wrapper = await mountSuspended(AppHeader, { route: '/' })
 
     await scrollWindowTo(400)

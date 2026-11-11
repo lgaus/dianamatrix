@@ -13,8 +13,8 @@ const blockOrder = [
   'consultation-block',
 ]
 
-describe('index.vue: каркас', () => {
-  it('рендерит 5 блоков в порядке макета, каждый по одному разу', async () => {
+describe('index.vue: layout', () => {
+  it('renders 5 blocks in mockup order, each once', async () => {
     const wrapper = await mountSuspended(IndexPage, { route: '/' })
     const testIds = wrapper.findAll('[data-testid]')
       .map(element => element.attributes('data-testid'))
@@ -24,8 +24,8 @@ describe('index.vue: каркас', () => {
   })
 })
 
-describe('about.vue: заготовка', () => {
-  it('рендерится и не содержит блоков главной', async () => {
+describe('about.vue: stub', () => {
+  it('renders without home page blocks', async () => {
     const wrapper = await mountSuspended(AboutPage, { route: '/about' })
 
     expect(wrapper.find('[data-testid="about-page"]').exists()).toBe(true)

@@ -9,7 +9,7 @@ import { tintPressedClass } from '~/config/feedback'
 const isShown = (element: Element): boolean => (element as HTMLElement).style.display !== 'none'
 
 describe('HeaderMenu', () => {
-  it('закрыто: aria-expanded=false, меню скрыто, кнопка связана с меню', async () => {
+  it('closed: aria-expanded=false, menu hidden, button linked to menu', async () => {
     const wrapper = await mountSuspended(HeaderMenu, { props: { open: false }, route: '/' })
     const button = wrapper.get('[data-testid="header-menu-button"]')
     const menu = wrapper.get('[data-testid="header-menu"]')
@@ -19,14 +19,14 @@ describe('HeaderMenu', () => {
     expect(isShown(menu.element)).toBe(false)
   })
 
-  it('открыто: aria-expanded=true, меню видно', async () => {
+  it('open: aria-expanded=true, menu visible', async () => {
     const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
 
     expect(wrapper.get('[data-testid="header-menu-button"]').attributes('aria-expanded')).toBe('true')
     expect(isShown(wrapper.get('[data-testid="header-menu"]').element)).toBe(true)
   })
 
-  it('клик по кнопке отправляет update:open с противоположным значением', async () => {
+  it('button click emits update:open with the opposite value', async () => {
     const closed = await mountSuspended(HeaderMenu, { props: { open: false }, route: '/' })
     await closed.get('[data-testid="header-menu-button"]').trigger('click')
     expect(closed.emitted('update:open')).toEqual([[true]])
@@ -37,7 +37,7 @@ describe('HeaderMenu', () => {
     expect(opened.emitted('update:open')).toEqual([[false]])
   })
 
-  it('бургер: при открытом меню — состояние «нажата» (tintPressedClass), при закрытом — нет', async () => {
+  it('burger: pressed state (tintPressedClass) when menu is open, none when closed', async () => {
     const pressed = tintPressedClass.split(/\s+/).filter(Boolean)
 
     const opened = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
@@ -50,7 +50,7 @@ describe('HeaderMenu', () => {
     for (const name of pressed) expect(closedClasses).not.toContain(name)
   })
 
-  it('бургер — кнопка с доступным именем; иконка скрыта от диктора и меняется при открытии', async () => {
+  it('burger is a button with an accessible name; icon hidden from screen readers, changes when open', async () => {
     const closed = await mountSuspended(HeaderMenu, { props: { open: false }, route: '/' })
     const button = closed.get('[data-testid="header-menu-button"]')
     expect(button.element.tagName).toBe('BUTTON')
@@ -64,7 +64,7 @@ describe('HeaderMenu', () => {
     expect(opened.get('[data-testid="header-menu-icon"]').attributes('data-icon')).not.toBe(closedIconKind)
   })
 
-  it('клик по ссылке меню отправляет update:open=false', async () => {
+  it('menu link click emits update:open=false', async () => {
     const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
 
     await wrapper.get('[data-testid="header-menu"] a').trigger('click')
