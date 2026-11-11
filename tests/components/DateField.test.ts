@@ -24,7 +24,8 @@ afterEach(() => {
   while (wrappers.length) wrappers.pop()!.unmount()
 })
 
-const mountField = async (initial = '') => {
+// realTransition — настоящий Transition (по умолчанию Vue Test Utils его заглушает, и хуки after-enter не вызываются)
+const mountField = async (initial = '', { realTransition = false } = {}) => {
   const value = ref(initial)
   const Host = defineComponent({
     setup: () => () => h(DateField, {
@@ -36,7 +37,10 @@ const mountField = async (initial = '') => {
       },
     }),
   })
-  const wrapper = await mountSuspended(Host, { attachTo: document.body })
+  const wrapper = await mountSuspended(Host, {
+    attachTo: document.body,
+    ...(realTransition && { global: { stubs: { transition: false } } }),
+  })
   wrappers.push(wrapper)
   return { wrapper, value }
 }
@@ -242,13 +246,31 @@ describe('DateField: closing without confirm', () => {
     expect(value.value).toBe('14.07.1992')
   })
 
-  it('calendar changes are reverted on blur', async () => {
+  it('calendar changes are reverted when focus moves to an outside element (Tab)', async () => {
     const { wrapper, value } = await mountField('14.07.1992')
     await openField(wrapper)
     await day(wrapper, 20).trigger('click')
-    await input(wrapper).trigger('focusout', { relatedTarget: null })
+    const outside = document.createElement('button')
+    document.body.append(outside)
+    input(wrapper).element.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: outside }))
+    outside.remove()
     await nextTick()
+    expect(picker(wrapper).exists()).toBe(false)
     expect(value.value).toBe('14.07.1992')
+  })
+
+  it('focus leaving the window (native select picker on a phone) keeps the calendar and the chosen month/year', async () => {
+    const { wrapper, value } = await mountField('14.07.1992')
+    await openField(wrapper)
+    const select = wrapper.get('[data-testid="date-picker-month"]')
+    select.element.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }))
+    window.dispatchEvent(new FocusEvent('blur'))
+    await changeSelect(wrapper, 'month', 3)
+    await changeSelect(wrapper, 'year', 1990)
+    await nextTick()
+    expect(picker(wrapper).exists()).toBe(true)
+    expect([selectValue(wrapper, 'month'), selectValue(wrapper, 'year')]).toEqual(['3', '1990'])
+    expect(value.value).toBe('14.03.1990')
   })
 
   it('click outside field and calendar closes and reverts', async () => {
@@ -365,6 +387,32 @@ describe('DateField: pointer type', () => {
     await confirmButton(wrapper).trigger('click')
     await nextTick()
     expect(value.value).toBe('05.11.2026')
+  })
+
+  it('touch: tap on the field focuses without native scroll and opens the calendar', async () => {
+    mockPointer(true)
+    const { wrapper } = await mountField()
+    await nextTick()
+    const element = input(wrapper).element
+    const focus = vi.spyOn(element, 'focus')
+    // PointerEvent в happy-dom может не быть — тип касания задаётся полем события
+    const event = vtsFix(Object.assign(new Event('pointerdown', { bubbles: true, cancelable: true }), { pointerType: 'touch' }))
+    element.dispatchEvent(event)
+    await nextTick()
+    await nextTick()
+    expect(event.defaultPrevented).toBe(true)
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true })
+    expect(document.activeElement).toBe(element)
+    expect(picker(wrapper).exists()).toBe(true)
+  })
+
+  it('mouse: pointerdown on the field keeps the native behaviour', async () => {
+    mockPointer(false)
+    const { wrapper } = await mountField()
+    await nextTick()
+    const event = vtsFix(Object.assign(new Event('pointerdown', { bubbles: true, cancelable: true }), { pointerType: 'mouse' }))
+    input(wrapper).element.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
   })
 })
 
@@ -683,12 +731,10 @@ describe('DateField: calendar navigation and width', () => {
   })
 })
 
-describe('DateField: scrolling to the calendar below the field', () => {
+describe('DateField: placement and scrolling to the calendar', () => {
   // Раскладка в happy-dom не считается: поле (его блок) на fieldTop от верха окна, высота поля 52,
-  // календарь высотой panelHeight над полем (bottom-full) или под ним (top-full), отступ от поля 8
-  const FIELD_HEIGHT = 52
-  const GAP = 8
-  const mockLayout = ({ fieldTop, panelHeight, viewportHeight }: { fieldTop: number, panelHeight: number, viewportHeight: number }) => {
+  // календарь высотой 386 над полем (bottom-full) или под ним (top-full), отступ от поля 8
+  const mockLayout = (fieldTop: number) => {
     const isPanel = (element: HTMLElement) => element.dataset.testid === 'date-picker'
     // offsetParent в happy-dom нет: задаётся на время теста (родитель — блок поля с position: relative)
     Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
@@ -699,69 +745,39 @@ describe('DateField: scrolling to the calendar below the field', () => {
     })
     vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (this: HTMLElement) {
       if (!isPanel(this)) return 0
-      return this.classList.contains('bottom-full') ? -(panelHeight + GAP) : FIELD_HEIGHT + GAP
-    })
-    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
-      return isPanel(this) ? panelHeight : FIELD_HEIGHT
+      return this.classList.contains('bottom-full') ? -(386 + 8) : 52 + 8
     })
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue(
-      { top: fieldTop, bottom: fieldTop + FIELD_HEIGHT, left: 0, right: 0, width: 0, height: FIELD_HEIGHT, x: 0, y: fieldTop } as DOMRect)
-    vi.spyOn(window, 'innerHeight', 'get').mockReturnValue(viewportHeight)
-    return vi.spyOn(window, 'scrollBy').mockImplementation(() => {})
+      { top: fieldTop, bottom: fieldTop + 52, left: 0, right: 0, width: 0, height: 52, x: 0, y: fieldTop } as DOMRect)
+    return vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {})
   }
 
   afterEach(() => {
     Reflect.deleteProperty(HTMLElement.prototype, 'offsetParent')
   })
 
+  // Проверка видимости — после анимации появления (after-enter): ждём конца перехода
   const openAndSettle = async (wrapper: VueWrapper) => {
     await openField(wrapper)
-    for (let tick = 0; tick < 4; tick++) await nextTick()
+    await vi.waitFor(() => expect(Element.prototype.scrollIntoView).toHaveBeenCalled())
   }
 
-  it('below field and clipped at bottom: scrolls by the missing amount (smooth)', async () => {
+  it('fits above the field: opens above; visibility ensured with the minimal scroll (block nearest, smooth)', async () => {
     mockMedia(['pointer: coarse'])
-    const scrollBy = mockLayout({ fieldTop: 250, panelHeight: 386, viewportHeight: 640 })
-    const { wrapper } = await mountField()
-    await openAndSettle(wrapper)
-    expect(picker(wrapper).classes()).toContain('top-full')
-    // низ календаря: 250 + 52 + 8 + 386 = 696; + отступ 8 − 640
-    expect(scrollBy).toHaveBeenCalledTimes(1)
-    expect(scrollBy).toHaveBeenCalledWith({ top: 64, behavior: 'smooth' })
-  })
-
-  it('prefers-reduced-motion: scrolls without animation', async () => {
-    mockMedia(['pointer: coarse', 'prefers-reduced-motion: reduce'])
-    const scrollBy = mockLayout({ fieldTop: 250, panelHeight: 386, viewportHeight: 640 })
-    const { wrapper } = await mountField()
-    await openAndSettle(wrapper)
-    expect(scrollBy).toHaveBeenCalledWith({ top: 64, behavior: 'instant' })
-  })
-
-  it('calendar taller than viewport: scrolls no further than its top', async () => {
-    mockMedia(['pointer: coarse'])
-    const scrollBy = mockLayout({ fieldTop: 250, panelHeight: 386, viewportHeight: 300 })
-    const { wrapper } = await mountField()
-    await openAndSettle(wrapper)
-    // верх календаря: 250 + 52 + 8 = 310
-    expect(scrollBy).toHaveBeenCalledWith({ top: 310, behavior: 'smooth' })
-  })
-
-  it('below field and fully visible: no scroll', async () => {
-    mockMedia(['pointer: coarse'])
-    const scrollBy = mockLayout({ fieldTop: 250, panelHeight: 386, viewportHeight: 844 })
-    const { wrapper } = await mountField()
-    await openAndSettle(wrapper)
-    expect(picker(wrapper).classes()).toContain('top-full')
-    expect(scrollBy).not.toHaveBeenCalled()
-  })
-
-  it('above field: no scroll', async () => {
-    mockMedia(['pointer: coarse'])
-    const scrollBy = mockLayout({ fieldTop: 450, panelHeight: 386, viewportHeight: 640 })
-    const { wrapper } = await mountField()
+    const scrollIntoView = mockLayout(450)
+    const { wrapper } = await mountField('', { realTransition: true })
     await openAndSettle(wrapper)
     expect(picker(wrapper).classes()).toContain('bottom-full')
-    expect(scrollBy).not.toHaveBeenCalled()
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'smooth' })
+    expect(scrollIntoView.mock.contexts[0]).toBe(picker(wrapper).element)
+  })
+
+  it('does not fit above: opens below; prefers-reduced-motion — without animation', async () => {
+    mockMedia(['pointer: coarse', 'prefers-reduced-motion: reduce'])
+    const scrollIntoView = mockLayout(250)
+    const { wrapper } = await mountField('', { realTransition: true })
+    await openAndSettle(wrapper)
+    expect(picker(wrapper).classes()).toContain('top-full')
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'auto' })
   })
 })
