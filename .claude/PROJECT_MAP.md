@@ -9,6 +9,7 @@
 | Шаги, правила работы и кода | `PLAN.md`: «Правила работы», «Правила кода», раздел текущего шага | planner; остальным — только если правило не передано в брифе |
 | Дизайн-значения (цвета, шрифты, токены, правило наведения) | `PLAN.md` → «Дизайн-значения» | при работе с вёрсткой |
 | Порядок работы агентов | `CLAUDE.md` | координатор, planner |
+| Решения пользователя по текущему шагу (раунды) | `stepN-decisions.md` в scratchpad сессии — путь даёт координатор | все агенты, перед работой |
 
 ## Код
 | Область | Файлы |
@@ -18,11 +19,14 @@
 | Расшифровки арканов | `app/content/arcana.ts` |
 | Типы матрицы | `app/utils/matrix/types.ts` |
 | Формулы (тестовые) | `app/utils/matrix/formulas.ts` |
+| Дата рождения: маска, правка с клавиатуры, проверка, сетка календаря | `app/utils/date/birthDate.ts` |
 | Чакры: id, цвет кольца, точки | `app/config/chakras.ts` |
 | Классы отклика (hover / active / focus) | `app/config/feedback.ts` |
 | Каркас: фон, контейнер, шапка над страницей | `app/app.vue` |
 | Главная — только компоновка блоков | `app/pages/index.vue`; заготовка «Обо мне» — `app/pages/about.vue` |
 | Шапка и меню | `app/components/AppHeader.vue`, `app/components/HeaderMenu.vue`, `app/composables/useHideOnScroll.ts` |
+| Форма: наклейка, табы, поля | `CalculatorForm.vue` (компоновка, отправка), `StickerBadge.vue`, `FormTabs.vue`, `TextField.vue` (поле с ошибкой) |
+| Поле даты и календарь | `DateField.vue` (маска, открытие, положение и ширина календаря, автопрокрутка), `DatePicker.vue` (календарь), `CalendarSelect.vue` (селекты месяца/года), `app/composables/useRowWrap.ts` (перенос навигации) |
 | Блоки страницы | `app/components/CalculatorForm.vue`, `MatrixChart.vue`, `HealthMapCard.vue`, `PurposeCard.vue`, `ConsultationBlock.vue` |
 | Сборка, деплой | `nuxt.config.ts`, `.github/workflows/deploy.yml` (main → корень gh-pages, develop → /dev/) |
 
@@ -35,7 +39,10 @@
 | `formulas.test.ts` | формулы на двух контрольных датах, chakras.ts |
 | `feedback.test.ts` | классы отклика |
 | `useHideOnScroll.test.ts` | скрытие шапки при прокрутке |
-| `components/*.test.ts` | шапка, меню, порядок блоков главной |
+| `birthDate.test.ts`, `birthDateEdit.test.ts`, `birthDateKeyEdit.test.ts` | маска, правка, проверка даты |
+| `components/CalculatorForm`, `DateField`, `DatePicker`, `CalendarSelect` `.test.ts` | форма, поле даты, календарь |
+| `helpers/vueEvents.ts` | помощник для событий при замороженном времени (`vi.setSystemTime`) |
+| `components/AppHeader`, `HeaderMenu`, `IndexPage` `.test.ts` | шапка, меню, порядок блоков главной |
 
 ## Макеты
 - В облачной копии: `/mnt/user-data/uploads/dianamatrix/docs/mockups/` (PNG @2x: компьютер 2560×4400, телефон 780×5800). В репозитории их нет.
@@ -43,5 +50,6 @@
 
 ## Окружение (облачная копия)
 - Клон: `/home/claude/dianamatrix`. `bun`, Node 22, Playwright + Chromium предустановлены (в проект не ставить). `rsync` нет — для копий `cp`/`tar`.
-- Временные файлы — в scratchpad сессии, не в проекте.
+- Временные файлы — в scratchpad сессии, не в проекте. Скрипты замеров в браузере — `scratchpad/pw/`, использовать готовые.
+- Подключение к компьютеру пользователя (её папка `dianamatrix`) — только у координатора, для записи изменённых файлов без коммита.
 - Команды проверки: `bun run test`, `bunx nuxi typecheck`, `NITRO_PRESET=github_pages NUXT_APP_BASE_URL=/dianamatrix/ bunx nuxi generate`.
