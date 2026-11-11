@@ -44,6 +44,7 @@ watch(isMenuOpen, (isOpen) => {
     data-testid="app-header"
     @focusin="reveal"
   >
+    <!-- Высота шапки (телефон 60, с md — 78) должна совпадать со scroll-padding-top у html в main.css -->
     <div class="mx-auto flex max-w-6xl items-center justify-between py-2 md:py-4">
       <!-- Логотип: арка-заглушка фото (на /about — стрелка «назад» в том же боксе), имя, подпись (с md) -->
       <div class="flex items-center gap-2.5 md:gap-3">

@@ -35,9 +35,10 @@ const submit = async (wrapper: VueWrapper) => {
   await nextTick()
 }
 
-// Уход фокуса из поля даты (Tab или клик по другому элементу)
+// Уход фокуса из поля даты на другой элемент (Tab): следующий — кнопка «Рассчитать»
 const leaveDate = async (wrapper: VueWrapper) => {
-  await wrapper.get(DATE).trigger('focusout', { relatedTarget: null })
+  const next = wrapper.get('[data-testid="calculator-submit"]').element
+  wrapper.get(DATE).element.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: next }))
   await nextTick()
 }
 

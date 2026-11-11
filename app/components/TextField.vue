@@ -22,7 +22,7 @@ const errorId = computed(() => `${props.id}-error`)
 const input = ref<HTMLInputElement>()
 
 defineExpose({
-  focus: () => input.value?.focus(),
+  focus: (options?: FocusOptions) => input.value?.focus(options),
   input,
 })
 </script>
