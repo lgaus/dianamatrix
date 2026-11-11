@@ -61,7 +61,7 @@ const expectedColors: Record<string, string> = {
 }
 
 // Цвета, производные от других токенов (без своего hex)
-const derivedColors = ['shadow']
+const derivedColors = ['shadow', 'accent-shaded']
 
 // Первое семейство из списка font-family, без кавычек
 const firstFontFamily = (value: string | undefined): string =>
@@ -146,11 +146,16 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--opacity-tint-border')).toBe('25%')
   })
 
-  it('has only --opacity-grain, --opacity-tint and --opacity-tint-border opacity tokens', () => {
+  // Модификатор цвета text-ink-muted/disabled (текст неактивных кнопок с фоном), в процентах
+  it('--opacity-disabled is a percent (for color-mix)', () => {
+    expect(themeTokens.get('--opacity-disabled')).toMatch(/^\d+%$/)
+  })
+
+  it('has only --opacity-disabled, --opacity-grain, --opacity-tint and --opacity-tint-border opacity tokens', () => {
     const opacityTokens = [...themeTokens.keys()]
       .filter(name => name.startsWith('--opacity-'))
       .sort()
-    expect(opacityTokens).toEqual(['--opacity-grain', '--opacity-tint', '--opacity-tint-border'])
+    expect(opacityTokens).toEqual(['--opacity-disabled', '--opacity-grain', '--opacity-tint', '--opacity-tint-border'])
   })
 
   it('--shadow-menu is the only shadow token and uses the shadow color', () => {

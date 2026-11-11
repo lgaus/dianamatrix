@@ -3,6 +3,7 @@
 // TODO: заменить все плейсхолдеры [...] настоящими данными (строки помечены TODO ниже).
 // Ключи с суффиксом Mobile — тексты, которые на телефоне отличаются от компьютера.
 import type { ChakraId } from '../utils/matrix/types'
+import type { BirthDateError } from '../utils/date/birthDate'
 
 // Слова формул «Предназначения»; они же названия карточек (personal, social, spiritual, planetary)
 const purposeTerms = {
@@ -44,11 +45,39 @@ export const texts = {
     nameLabel: 'Имя',
     birthDateLabel: 'Дата рождения',
     submit: 'Рассчитать',
+    // Подписи-подсказки внутри пустых полей
+    namePlaceholder: 'Как вас зовут',
+    birthDatePlaceholder: 'ДД.ММ.ГГГГ',
+    // Пометка у таба «Для пары», пока он не работает
+    soon: 'скоро',
+    // Ошибки поля даты; ключи — коды ошибок из app/utils/date/birthDate.ts.
+    // tooEarly — функция от самого раннего допустимого года (граница задаётся только в birthDate.ts, MIN_BIRTH_DATE)
+    errors: {
+      required: 'Введите дату рождения',
+      format: 'Введите дату в формате ДД.ММ.ГГГГ',
+      nonexistent: 'Такой даты нет — проверьте день и месяц',
+      future: 'Дата не может быть в будущем',
+      tooEarly: (minYear: number) => `Год — не раньше ${minYear}`,
+    } satisfies Record<BirthDateError, string | ((minYear: number) => string)>,
+    calendar: {
+      // Доступное имя окна календаря
+      label: 'Календарь',
+      confirm: 'Подтвердить',
+      prevMonth: 'Предыдущий месяц',
+      nextMonth: 'Следующий месяц',
+      // Доступные имена селектов года и месяца
+      year: 'Год',
+      month: 'Месяц',
+      // С января по декабрь
+      months: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+      // С понедельника
+      weekdays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+    },
   },
 
   matrix: {
-    // Подпись под схемой; date — дата рождения в том виде, как её показать
-    caption: (date: string) => `Ваша матрица • ${date}`,
+    // Подпись под схемой; date — дата рождения в том виде, как её показать, name — имя из формы (если введено)
+    caption: (date: string, name?: string) => `${name || 'Ваша матрица'} • ${date}`,
   },
 
   healthMap: {
