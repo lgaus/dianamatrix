@@ -97,13 +97,13 @@ export const texts = {
     total: 'Итого',
     // Ключи — id чакр, порядок как в таблице макета
     chakras: {
-      sahasrara: { name: 'Сахасрара', zone: 'Голова, мозг' },
-      ajna: { name: 'Аджна', zone: 'Глаза, лицо' },
-      vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа' },
-      anahata: { name: 'Анахата', zone: 'Сердце, лёгкие' },
-      manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ' },
-      svadhisthana: { name: 'Свадхистана', zone: 'Поясница, репродуктивная система' },
-      muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги' },
+      sahasrara: { name: 'Сахасрара', zone: 'Голова, мозг. Cвязь с высшим' },
+      ajna: { name: 'Аджна', zone: 'Глаза, лицо. Мышление' },
+      vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа. Самовыражение' },
+      anahata: { name: 'Анахата', zone: 'Сердце, лёгкие. Отношения с людьми' },
+      manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ. Сила воли' },
+      svadhisthana: { name: 'Свадхистана', zone: 'Поясница, репродуктивная система. Желания' },
+      muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги. Безопасность' },
     } satisfies Record<ChakraId, { name: string, zone: string }>,
   },
 
@@ -119,15 +119,15 @@ export const texts = {
       spiritual: 'после 60',
       planetary: 'всю жизнь',
     },
-    // Строки формул под крупной цифрой карточки
+    // Строки формул рядом с крупным числом; до расчёта вместо чисел — matrix.emptyValue
     formulas: {
-      personal: (sky: number, earth: number) =>
+      personal: (sky: number | string, earth: number | string) =>
         `${purposeTerms.sky} ${sky} + ${purposeTerms.earth} ${earth}`,
-      social: (male: number, female: number) =>
+      social: (male: number | string, female: number | string) =>
         `${purposeTerms.male} ${male} + ${purposeTerms.female} ${female}`,
-      spiritual: (personal: number, social: number) =>
+      spiritual: (personal: number | string, social: number | string) =>
         `${purposeTerms.personal} ${personal} + ${purposeTerms.social} ${social}`,
-      planetary: (social: number, spiritual: number) =>
+      planetary: (social: number | string, spiritual: number | string) =>
         `${purposeTerms.social} ${social} + ${purposeTerms.spiritual} ${spiritual}`,
     },
   },

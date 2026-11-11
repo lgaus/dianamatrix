@@ -20,6 +20,14 @@ const expectedRows = (health: HealthMap) =>
 const renderedRows = (wrapper: VueWrapper) => [...bodyRows(wrapper), wrapper.get('tfoot tr')].map(cells)
 
 describe('HealthMapCard: structure', () => {
+  // Шапка — общий компонент CardHeading
+  it('has the card header with its number, an h2 title and the subtitle', async () => {
+    const wrapper = await mountSuspended(HealthMapCard)
+    expect(wrapper.text()).toContain(texts.healthMap.number)
+    expect(wrapper.get('h2').text()).toBe(texts.healthMap.title)
+    expect(wrapper.text()).toContain(texts.healthMap.subtitle)
+  })
+
   it('is a table with a caption, 4 column headers and a row header per chakra and total', async () => {
     const wrapper = await mountSuspended(HealthMapCard)
     expect(wrapper.find('table caption').text()).not.toBe('')

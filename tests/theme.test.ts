@@ -208,6 +208,11 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--text-cell')).toBe('0.9375rem')
   })
 
+  // Крупные числа «Предназначения» 32 px; в rem, чтобы росли с размером шрифта браузера
+  it('--text-number is 32px in rem', () => {
+    expect(themeTokens.get('--text-number')).toBe('2rem')
+  })
+
   it('--grain-blend-mode is soft-light', () => {
     expect(rootVariables.get('--grain-blend-mode')).toBe('soft-light')
   })

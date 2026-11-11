@@ -22,19 +22,11 @@ const MARKER_STROKE = 3
     class="min-w-0 rounded-card border border-line bg-surface p-4 pt-5.5 phablet:p-7 phablet:pt-7.5"
     data-testid="health-map-card"
   >
-    <div class="flex items-center gap-3.5">
-      <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-semibold text-ink">
-        {{ texts.healthMap.number }}
-      </span>
-      <div>
-        <h2 class="font-display text-xl font-bold tracking-heading text-ink">
-          {{ texts.healthMap.title }}
-        </h2>
-        <p class="mt-0.5 text-sm text-ink-muted">
-          {{ texts.healthMap.subtitle }}
-        </p>
-      </div>
-    </div>
+    <CardHeading
+      :number="texts.healthMap.number"
+      :title="texts.healthMap.title"
+      :subtitle="texts.healthMap.subtitle"
+    />
 
     <!-- При крупном шрифте таблица шире карточки — прокручивается внутри обёртки, страница нет -->
     <div class="mt-5 overflow-x-auto">
