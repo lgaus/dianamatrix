@@ -1,1 +1,0 @@
-import{a as e,l as t,t as n}from"#entry";var r={},i={"data-testid":`about-page`};function a(n,r){return t(),e(`main`,i)}var o=n(r,[[`render`,a]]);export{o as default};
