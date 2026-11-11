@@ -97,13 +97,13 @@ export const texts = {
     total: 'Итого',
     // Ключи — id чакр, порядок как в таблице макета
     chakras: {
-      sahasrara: { name: 'Сахасрара', zone: 'Голова, мозг' },
-      ajna: { name: 'Аджна', zone: 'Глаза, лицо' },
-      vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа' },
-      anahata: { name: 'Анахата', zone: 'Сердце, лёгкие' },
-      manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ' },
-      svadhisthana: { name: 'Свадхистана', zone: 'Поясница, репродуктивная система' },
-      muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги' },
+      sahasrara: { name: 'Сахасрара', zone: 'Голова, мозг. Cвязь с высшим' },
+      ajna: { name: 'Аджна', zone: 'Глаза, лицо. Мышление' },
+      vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа. Самовыражение' },
+      anahata: { name: 'Анахата', zone: 'Сердце, лёгкие. Отношения с людьми' },
+      manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ. Сила воли' },
+      svadhisthana: { name: 'Свадхистана', zone: 'Поясница, репродуктивная система. Желания' },
+      muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги. Безопасность' },
     } satisfies Record<ChakraId, { name: string, zone: string }>,
   },
 
