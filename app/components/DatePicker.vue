@@ -169,7 +169,8 @@ const grid = ref<HTMLTableElement>()
 
 const focusActiveDay = async () => {
   await nextTick()
-  grid.value?.querySelector<HTMLButtonElement>(`[data-day="${active.value.day}"]`)?.focus()
+  // Без прокрутки страницы: календарь уже виден (его положение выбирает DateField)
+  grid.value?.querySelector<HTMLButtonElement>(`[data-day="${active.value.day}"]`)?.focus({ preventScroll: true })
 }
 
 // Шаг стрелок в днях

@@ -256,11 +256,14 @@ describe('DateField', () => {
     expect(value.value).toBe('14.07.1992')
   })
 
-  it('focus leaving the field closes the calendar', async () => {
+  it('focus moving to an outside element closes the calendar', async () => {
     const { wrapper } = await mountField()
     await input(wrapper).trigger('focus')
     await nextTick()
-    await input(wrapper).trigger('focusout', { relatedTarget: null })
+    const outside = document.createElement('button')
+    document.body.append(outside)
+    input(wrapper).element.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: outside }))
+    outside.remove()
     await nextTick()
     expect(picker(wrapper).exists()).toBe(false)
   })
