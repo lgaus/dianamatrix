@@ -27,6 +27,7 @@
 | Шапка и меню | `app/components/AppHeader.vue`, `app/components/HeaderMenu.vue`, `app/composables/useHideOnScroll.ts` |
 | Форма: наклейка, табы, поля | `CalculatorForm.vue` (компоновка, отправка), `StickerBadge.vue`, `FormTabs.vue`, `TextField.vue` (поле с ошибкой) |
 | Схема матрицы | `MatrixChart.vue` (звезда, аура, зерно, подпись, `MATRIX_CHART_ID`), `MatrixNode.vue` (один круг); прокрутка к схеме после расчёта — в `CalculatorForm.vue` |
+| Карта здоровья | `HealthMapCard.vue` (таблица чакр, данные через props, «–» без данных) |
 | Поле даты и календарь | `DateField.vue` (маска, открытие, положение и ширина календаря, автопрокрутка), `DatePicker.vue` (календарь), `CalendarSelect.vue` (селекты месяца/года), `app/composables/useRowWrap.ts` (перенос навигации) |
 | Блоки страницы | `app/components/CalculatorForm.vue`, `MatrixChart.vue`, `HealthMapCard.vue`, `PurposeCard.vue`, `ConsultationBlock.vue` |
 | Сборка, деплой | `nuxt.config.ts`, `.github/workflows/deploy.yml` (main → корень gh-pages, develop → /dev/) |
@@ -43,6 +44,7 @@
 | `birthDate.test.ts`, `birthDateEdit.test.ts`, `birthDateKeyEdit.test.ts` | маска, правка, проверка даты |
 | `components/CalculatorForm`, `DateField`, `DatePicker`, `CalendarSelect` `.test.ts` | форма, поле даты, календарь |
 | `components/MatrixChart`, `MatrixNode` `.test.ts` | схема матрицы: числа, кольца, подпись, пустое состояние |
+| `components/HealthMapCard.test.ts` | карта здоровья: структура таблицы, числа, «–» |
 | `helpers/vueEvents.ts` | помощник для событий при замороженном времени (`vi.setSystemTime`) |
 | `components/AppHeader`, `HeaderMenu`, `IndexPage` `.test.ts` | шапка, меню, порядок блоков главной |
 
