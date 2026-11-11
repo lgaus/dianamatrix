@@ -102,7 +102,7 @@ export const texts = {
       vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа' },
       anahata: { name: 'Анахата', zone: 'Сердце, лёгкие' },
       manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ' },
-      svadhisthana: { name: 'Свадхистхана', zone: 'Поясница, репродуктивная система' },
+      svadhisthana: { name: 'Свадхистана', zone: 'Поясница, репродуктивная система' },
       muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги' },
     } satisfies Record<ChakraId, { name: string, zone: string }>,
   },

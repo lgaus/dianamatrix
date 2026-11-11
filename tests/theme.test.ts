@@ -180,10 +180,11 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--shadow-menu')).toMatch(/var\(--color-shadow\)$/)
   })
 
-  it('--breakpoint-xs is 30rem (480 px), the only custom breakpoint', () => {
+  it('custom breakpoints: --breakpoint-xs 30rem (480 px), --breakpoint-phablet 34.375rem (550 px)', () => {
     const breakpointTokens = [...themeTokens.keys()].filter(name => name.startsWith('--breakpoint-'))
-    expect(breakpointTokens).toEqual(['--breakpoint-xs'])
+    expect(breakpointTokens).toEqual(['--breakpoint-xs', '--breakpoint-phablet'])
     expect(themeTokens.get('--breakpoint-xs')).toBe('30rem')
+    expect(themeTokens.get('--breakpoint-phablet')).toBe('34.375rem')
   })
 
   it('--radius-block is 28px, --radius-card is 20px, --radius-arch is 50%', () => {
@@ -200,6 +201,11 @@ describe('theme.css: fonts and effects', () => {
   // Подпись схемы на телефоне 13 px; в rem, чтобы росла с размером шрифта браузера
   it('--text-caption-sm is 13px in rem', () => {
     expect(themeTokens.get('--text-caption-sm')).toBe('0.8125rem')
+  })
+
+  // Ячейки карты здоровья с phablet (550 px) 15 px; в rem, чтобы росли с размером шрифта браузера
+  it('--text-cell is 15px in rem', () => {
+    expect(themeTokens.get('--text-cell')).toBe('0.9375rem')
   })
 
   it('--grain-blend-mode is soft-light', () => {
