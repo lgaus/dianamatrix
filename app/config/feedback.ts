@@ -11,6 +11,9 @@ export const interactiveClass = 'transition-[color,background-color,border-color
 export const outerFocusClass = 'focus-visible:outline-offset-2'
 export const innerFocusClass = 'focus-visible:-outline-offset-2'
 
+// Неактивная кнопка с фоном («Рассчитать», «Подтвердить» в календаре): без отклика, светлый текст на фоне line
+export const disabledFillClass = 'cursor-default bg-line text-ink-muted/disabled'
+
 // Нажатие кнопок
 export const pressClass = 'cursor-pointer motion-safe:active:scale-97'
 
@@ -25,6 +28,10 @@ export const tintBorderFeedbackClass = 'hover:border-accent-hover/tint-border ac
 
 // Состояние «нажата» (бургер при открытом меню): подкрашенный фон и затемнённая рамка постоянно
 export const tintPressedClass = 'bg-accent-hover/tint border-accent-hover/tint-border'
+
+// Кнопки с фоном accent («Рассчитать», «Подтвердить», выбранный день календаря):
+// фон — accent под слоем тёмной фуксии 40 % (токен accent-shaded)
+export const accentFillFeedbackClass = 'hover:bg-accent-shaded active:bg-accent-shaded'
 
 // Акцентный текст на подкрашенном фоне темнеет до accent-hover: контраст accent на подкраске ниже 4.5:1
 export const accentTextFeedbackClass = 'hover:text-accent-hover active:text-accent-hover'

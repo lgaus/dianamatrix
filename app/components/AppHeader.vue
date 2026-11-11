@@ -34,7 +34,8 @@ watch(isMenuOpen, (isOpen) => {
 </script>
 
 <template>
-  <!-- Фон и поля на всю ширину окна, содержимое — в контейнере как у страницы (до 1152 px; поля: телефон 16, компьютер 64) -->
+  <!-- Фон и поля на всю ширину окна, содержимое — в контейнере как у страницы (до 1152 px; поля: телефон 16, компьютер 64).
+       Высота: телефон 60 (кнопки 44 + 2×8), с md — 78 (кнопка 46 + 2×16) -->
   <!-- Сдвиг вверх только ниже md: на md+ шапка видна всегда -->
   <header
     class="sticky top-0 z-20 bg-page px-4 transition-transform duration-200 ease-out motion-reduce:transition-none lg:px-16"
@@ -42,7 +43,7 @@ watch(isMenuOpen, (isOpen) => {
     data-testid="app-header"
     @focusin="reveal"
   >
-    <div class="mx-auto flex max-w-6xl items-center justify-between py-4 md:py-7">
+    <div class="mx-auto flex max-w-6xl items-center justify-between py-2 md:py-4">
       <!-- Логотип: арка-заглушка фото (на /about — стрелка «назад» в том же боксе), имя, подпись (с md) -->
       <div class="flex items-center gap-2.5 md:gap-3">
         <!-- Доступное имя: на главной — текст логотипа, на /about — скрытый текст «На главную» + текст логотипа -->

@@ -118,6 +118,12 @@ describe('texts: functions with data', () => {
     expect(result).toContain(date)
   })
 
+  it.each(dates)('matrix.caption(%s, name) contains the date and the name', (date) => {
+    const result = texts.matrix.caption(date, 'Анна')
+    expect(result).toContain(date)
+    expect(result).toContain('Анна')
+  })
+
   // Какие слова из purpose.terms должна содержать каждая формула
   const formulaTerms = {
     personal: ['sky', 'earth'],

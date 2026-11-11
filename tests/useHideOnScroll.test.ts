@@ -37,14 +37,14 @@ afterEach(async () => {
 })
 
 describe('useHideOnScroll', () => {
-  it('сначала виден', async () => {
+  it('visible initially', async () => {
     const { wrapper, state } = await mountWithComposable()
     mounted = wrapper
 
     expect(state.isHidden.value).toBe(false)
   })
 
-  it('прячется при прокрутке вниз и показывается при прокрутке вверх', async () => {
+  it('hides on scroll down and shows on scroll up', async () => {
     const { wrapper, state } = await mountWithComposable()
     mounted = wrapper
 
@@ -58,7 +58,7 @@ describe('useHideOnScroll', () => {
     expect(state.isHidden.value).toBe(true)
   })
 
-  it('наверху страницы виден всегда', async () => {
+  it('always visible at the top of the page', async () => {
     const { wrapper, state } = await mountWithComposable()
     mounted = wrapper
 
@@ -69,7 +69,7 @@ describe('useHideOnScroll', () => {
     expect(state.isHidden.value).toBe(false)
   })
 
-  it('сдвиг меньше порога не меняет состояние', async () => {
+  it('scroll below the threshold does not change state', async () => {
     const { wrapper, state } = await mountWithComposable(10)
     mounted = wrapper
 
@@ -85,7 +85,7 @@ describe('useHideOnScroll', () => {
     expect(state.isHidden.value).toBe(false)
   })
 
-  it('reveal() показывает сразу, дальнейшая прокрутка вниз снова прячет', async () => {
+  it('reveal() shows at once; further scroll down hides again', async () => {
     const { wrapper, state } = await mountWithComposable()
     mounted = wrapper
 
@@ -100,7 +100,7 @@ describe('useHideOnScroll', () => {
     expect(state.isHidden.value).toBe(true)
   })
 
-  it('после размонтирования прокрутка не меняет состояние', async () => {
+  it('scrolling after unmount does not change state', async () => {
     const { wrapper, state } = await mountWithComposable()
 
     wrapper.unmount()
