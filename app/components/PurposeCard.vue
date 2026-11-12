@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Карточка «Предназначение»: шапка и 4 ячейки (личное, социальное, духовное, планетарное).
-// В ячейке: название (h3) и возраст, крупное число и формула. Расшифровки аркана нет.
+// В ячейке: название (h3) и возраст (если подпись пустая — без возраста), крупное число и формула. Расшифровки аркана нет.
 // Без purpose — «–» вместо чисел, в том числе в формулах; высота карточки та же.
 // С phablet (550 px) — сетка 2×2, ниже — одна колонка в том же порядке.
 import type { Purpose } from '~/utils/matrix/types'
@@ -45,7 +45,10 @@ const cells = computed(() => [
           <h3 class="font-display text-cell font-bold tracking-heading text-ink">
             {{ texts.purpose.terms[cell.key] }}
           </h3>
-          <span class="text-xs text-ink-muted">
+          <span
+            v-if="texts.purpose.ages[cell.key]"
+            class="text-xs text-ink-muted"
+          >
             {{ texts.purpose.ages[cell.key] }}
           </span>
         </div>
