@@ -1,16 +1,24 @@
+<script setup lang="ts">
+const { points, health, purpose, birthDate, name, calculate } = useMatrix()
+</script>
+
 <template>
   <!-- Главная: только компоновка блоков. Телефон — одна колонка, компьютер (с lg) — сетка как в макете.
        Промежутки между всеми блоками по вертикали одинаковые: телефон 16, компьютер 32 -->
   <main class="flex flex-col gap-4 lg:gap-8 lg:pt-6">
     <!-- Ряд 1: форма | матрица (460:660, одинаковая высота) -->
     <div class="grid gap-4 lg:grid-cols-[460fr_660fr] lg:gap-8">
-      <CalculatorForm />
-      <MatrixChart />
+      <CalculatorForm @submit="calculate" />
+      <MatrixChart
+        :points="points"
+        :birth-date="birthDate"
+        :name="name"
+      />
     </div>
     <!-- Ряд 2: карта здоровья | предназначение (прижато к верху) -->
     <div class="grid items-start gap-4 lg:grid-cols-2 lg:gap-6">
-      <HealthMapCard />
-      <PurposeCard />
+      <HealthMapCard :health="health" />
+      <PurposeCard :purpose="purpose" />
     </div>
     <ConsultationBlock />
   </main>

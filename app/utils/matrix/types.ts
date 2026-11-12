@@ -22,6 +22,12 @@ export interface BirthDate {
   year: number
 }
 
+// Данные формы для расчёта: имя (без пробелов по краям; нет — undefined) и дата рождения
+export interface MatrixInput {
+  name: string | undefined
+  birthDate: BirthDate
+}
+
 // Имена точек матрицы
 export type PointKey =
   | 'A' | 'B' | 'C' | 'D' | 'E'

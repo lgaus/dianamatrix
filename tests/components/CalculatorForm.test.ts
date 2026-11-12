@@ -6,7 +6,6 @@ import { nextTick } from 'vue'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import type { VueWrapper } from '@vue/test-utils'
 import CalculatorForm from '~/components/CalculatorForm.vue'
-import { MATRIX_CHART_ID } from '~/components/MatrixChart.vue'
 import { disabledFillClass } from '~/config/feedback'
 import { texts } from '~/content/texts'
 import { type BirthDateError, MIN_BIRTH_DATE } from '~/utils/date/birthDate'
@@ -426,61 +425,5 @@ describe('CalculatorForm: submit button look', () => {
     await setDate(wrapper, '14.07.1992')
     expect(wrapper.get(SUBMIT).classes()).toEqual(expect.arrayContaining(['bg-accent', 'text-surface']))
     for (const cls of classesOf(disabledFillClass)) expect(wrapper.get(SUBMIT).classes()).not.toContain(cls)
-  })
-})
-
-// Прокрутка к схеме после расчёта: элемент с id схемы (MATRIX_CHART_ID), scrollIntoView заглушен
-describe('CalculatorForm: reveal matrix', () => {
-  let matrix: HTMLElement
-
-  beforeEach(() => {
-    matrix = document.createElement('section')
-    matrix.id = MATRIX_CHART_ID
-    document.body.append(matrix)
-    vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    matrix.remove()
-    vi.restoreAllMocks()
-  })
-
-  it('valid submit → matrix centered', async () => {
-    const wrapper = await mountForm()
-    await setDate(wrapper, '14.07.1992')
-    await submit(wrapper)
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: 'center', behavior: 'smooth' })
-    expect(vi.mocked(Element.prototype.scrollIntoView).mock.contexts).toEqual([matrix])
-  })
-
-  it('matrix taller than area under header → top under header (start)', async () => {
-    Object.assign(document.documentElement.style, { scrollPaddingTop: '60px', scrollPaddingBottom: '8px' })
-    vi.spyOn(matrix, 'offsetHeight', 'get').mockReturnValue(window.innerHeight - 60 - 8 + 1)
-    const wrapper = await mountForm()
-    await setDate(wrapper, '14.07.1992')
-    await submit(wrapper)
-    Object.assign(document.documentElement.style, { scrollPaddingTop: '', scrollPaddingBottom: '' })
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' })
-  })
-
-  it('lg breakpoint matches (matrix beside form) → no scroll', async () => {
-    document.documentElement.style.setProperty('--breakpoint-lg', '64rem')
-    vi.spyOn(window, 'matchMedia').mockImplementation(query => ({
-      matches: query === '(width >= 64rem)',
-      addEventListener: () => {},
-      removeEventListener: () => {},
-    }) as unknown as MediaQueryList)
-    const wrapper = await mountForm()
-    await setDate(wrapper, '14.07.1992')
-    await submit(wrapper)
-    document.documentElement.style.removeProperty('--breakpoint-lg')
-    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
-  })
-
-  it('invalid submit → no scroll', async () => {
-    const wrapper = await mountForm()
-    await setDate(wrapper, '14.07')
-    await submit(wrapper)
-    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled()
   })
 })
