@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { texts } from '~/content/texts'
 import { accentFillFeedbackClass, disabledFillClass, interactiveClass, outerFocusClass, pressClass } from '~/config/feedback'
-import type { BirthDate } from '~/utils/matrix/types'
+import type { MatrixInput } from '~/utils/matrix/types'
 import { type BirthDateError, MIN_BIRTH_DATE, parseBirthDate, toBirthDate } from '~/utils/date/birthDate'
 import type DateField from './DateField.vue'
 import { type FormTab, formTabId } from './FormTabs.vue'
@@ -11,13 +11,8 @@ import { type FormTab, formTabId } from './FormTabs.vue'
 // «Рассчитать» неактивна, пока в поле нет полной допустимой даты (имя не влияет); нажатие неактивной — отправка с ошибкой:
 // показывается ошибка даты, фокус — в поле даты.
 // Ошибка даты показывается после ухода с заполненного поля с ошибкой или после отправки и исчезает, как только дата исправлена.
-export interface CalculatorFormData {
-  name: string | undefined
-  birthDate: BirthDate
-}
-
 const emit = defineEmits<{
-  submit: [data: CalculatorFormData]
+  submit: [data: MatrixInput]
 }>()
 
 // Наибольшая длина имени

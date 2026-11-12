@@ -151,11 +151,28 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--opacity-disabled')).toMatch(/^\d+%$/)
   })
 
-  it('has only --opacity-disabled, --opacity-grain, --opacity-tint and --opacity-tint-border opacity tokens', () => {
+  // Модификаторы цвета линий схемы матрицы: stroke-matrix-line/matrix-edge (контур) и /matrix-axis (оси), в процентах
+  it('--opacity-matrix-edge and --opacity-matrix-axis are percents, edge more opaque than axis', () => {
+    const edge = themeTokens.get('--opacity-matrix-edge') ?? ''
+    const axis = themeTokens.get('--opacity-matrix-axis') ?? ''
+    expect(edge).toMatch(/^\d+%$/)
+    expect(axis).toMatch(/^\d+%$/)
+    expect(Number.parseFloat(edge)).toBeGreaterThan(Number.parseFloat(axis))
+  })
+
+  it('has only the known opacity tokens', () => {
     const opacityTokens = [...themeTokens.keys()]
       .filter(name => name.startsWith('--opacity-'))
       .sort()
-    expect(opacityTokens).toEqual(['--opacity-disabled', '--opacity-grain', '--opacity-tint', '--opacity-tint-border'])
+    expect(opacityTokens).toEqual([
+      '--opacity-backdrop',
+      '--opacity-disabled',
+      '--opacity-grain',
+      '--opacity-matrix-axis',
+      '--opacity-matrix-edge',
+      '--opacity-tint',
+      '--opacity-tint-border',
+    ])
   })
 
   it('--shadow-menu is the only shadow token and uses the shadow color', () => {
@@ -164,10 +181,11 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--shadow-menu')).toMatch(/var\(--color-shadow\)$/)
   })
 
-  it('--breakpoint-xs is 30rem (480 px), the only custom breakpoint', () => {
+  it('custom breakpoints: --breakpoint-xs 30rem (480 px), --breakpoint-phablet 34.375rem (550 px)', () => {
     const breakpointTokens = [...themeTokens.keys()].filter(name => name.startsWith('--breakpoint-'))
-    expect(breakpointTokens).toEqual(['--breakpoint-xs'])
+    expect(breakpointTokens).toEqual(['--breakpoint-xs', '--breakpoint-phablet'])
     expect(themeTokens.get('--breakpoint-xs')).toBe('30rem')
+    expect(themeTokens.get('--breakpoint-phablet')).toBe('34.375rem')
   })
 
   it('--radius-block is 28px, --radius-card is 20px, --radius-arch is 50%', () => {
@@ -176,9 +194,41 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--radius-arch')).toBe('50%')
   })
 
+  // Затемнение под окном контактов — модификатор цвета backdrop:bg-ink/backdrop, в процентах
+  it('--opacity-backdrop is a percent (for color-mix)', () => {
+    expect(themeTokens.get('--opacity-backdrop')).toMatch(/^\d+%$/)
+  })
+
+  // Арка-фото блока «Личный разбор»: верх — круг. Эллиптический процент под пропорции 340×420 (по высоте 170/420)
+  it('--radius-photo keeps a circular top for a 340×420 photo', () => {
+    const [horizontal, vertical] = (themeTokens.get('--radius-photo') ?? '').split(/\s+/).map(Number.parseFloat)
+    expect(horizontal).toBe(50)
+    expect((vertical ?? 0) * 420 / 100).toBeCloseTo(170, 1)
+  })
+
+  // Заголовок блока «Личный разбор» на телефоне (до xs) 22 px; в rem, чтобы рос с размером шрифта браузера
+  it('--text-title-xs is 22px in rem', () => {
+    expect(themeTokens.get('--text-title-xs')).toBe('1.375rem')
+  })
+
   it('--text-logo is 19px, --text-nav is 15px', () => {
     expect(themeTokens.get('--text-logo')).toBe('19px')
     expect(themeTokens.get('--text-nav')).toBe('15px')
+  })
+
+  // Подпись схемы на телефоне 13 px; в rem, чтобы росла с размером шрифта браузера
+  it('--text-caption-sm is 13px in rem', () => {
+    expect(themeTokens.get('--text-caption-sm')).toBe('0.8125rem')
+  })
+
+  // Ячейки карты здоровья с phablet (550 px) 15 px; в rem, чтобы росли с размером шрифта браузера
+  it('--text-cell is 15px in rem', () => {
+    expect(themeTokens.get('--text-cell')).toBe('0.9375rem')
+  })
+
+  // Крупные числа «Предназначения» 32 px; в rem, чтобы росли с размером шрифта браузера
+  it('--text-number is 32px in rem', () => {
+    expect(themeTokens.get('--text-number')).toBe('2rem')
   })
 
   it('--grain-blend-mode is soft-light', () => {

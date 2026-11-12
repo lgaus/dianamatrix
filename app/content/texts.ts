@@ -78,6 +78,10 @@ export const texts = {
   matrix: {
     // Подпись под схемой; date — дата рождения в том виде, как её показать, name — имя из формы (если введено)
     caption: (date: string, name?: string) => `${name || 'Ваша матрица'} • ${date}`,
+    // Доступное имя схемы (role="img"); числа в кругах по отдельности не читаются
+    chartLabel: 'Схема матрицы судьбы',
+    // В кругах до расчёта
+    emptyValue: '–',
   },
 
   healthMap: {
@@ -93,13 +97,13 @@ export const texts = {
     total: 'Итого',
     // Ключи — id чакр, порядок как в таблице макета
     chakras: {
-      sahasrara: { name: 'Сахасрара', zone: 'Голова, мозг' },
-      ajna: { name: 'Аджна', zone: 'Глаза, лицо' },
-      vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа' },
-      anahata: { name: 'Анахата', zone: 'Сердце, лёгкие' },
-      manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ' },
-      svadhisthana: { name: 'Свадхистхана', zone: 'Поясница, репродуктивная система' },
-      muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги' },
+      sahasrara: { name: 'Сахасрара', zone: 'Голова, мозг. Cвязь с высшим' },
+      ajna: { name: 'Аджна', zone: 'Глаза, лицо. Мышление' },
+      vishuddha: { name: 'Вишудха', zone: 'Горло, щитовидная железа. Самовыражение' },
+      anahata: { name: 'Анахата', zone: 'Сердце, лёгкие. Отношения с людьми' },
+      manipura: { name: 'Манипура', zone: 'ЖКТ, обмен веществ. Сила воли' },
+      svadhisthana: { name: 'Свадхистана', zone: 'Поясница, репродуктивная система. Желания' },
+      muladhara: { name: 'Муладхара', zone: 'Позвоночник, ноги. Безопасность' },
     } satisfies Record<ChakraId, { name: string, zone: string }>,
   },
 
@@ -108,22 +112,22 @@ export const texts = {
     title: 'Предназначение',
     subtitle: 'Личное, социальное и духовное — по возрастам',
     terms: purposeTerms,
-    // Подписи возрастов у карточек
+    // Подписи возрастов у карточек; пустая строка — подписи нет
     ages: {
       personal: '20–40 лет',
       social: '40–60 лет',
-      spiritual: 'после 60',
-      planetary: 'всю жизнь',
+      spiritual: 'всю жизнь',
+      planetary: '',
     },
-    // Строки формул под крупной цифрой карточки
+    // Строки формул рядом с крупным числом; до расчёта вместо чисел — matrix.emptyValue
     formulas: {
-      personal: (sky: number, earth: number) =>
+      personal: (sky: number | string, earth: number | string) =>
         `${purposeTerms.sky} ${sky} + ${purposeTerms.earth} ${earth}`,
-      social: (male: number, female: number) =>
+      social: (male: number | string, female: number | string) =>
         `${purposeTerms.male} ${male} + ${purposeTerms.female} ${female}`,
-      spiritual: (personal: number, social: number) =>
+      spiritual: (personal: number | string, social: number | string) =>
         `${purposeTerms.personal} ${personal} + ${purposeTerms.social} ${social}`,
-      planetary: (social: number, spiritual: number) =>
+      planetary: (social: number | string, spiritual: number | string) =>
         `${purposeTerms.social} ${social} + ${purposeTerms.spiritual} ${spiritual}`,
     },
   },
@@ -133,12 +137,26 @@ export const texts = {
     label: 'Личный разбор',
     title: 'Калькулятор показывает числа. Я помогу понять, что они значат для вас.',
     titleMobile: 'Хотите понять, что эти числа значат для вас?',
-    // TODO: заменить [ФАМИЛИЯ] и [короткая строка об опыте и подходе] настоящими данными
-    description: 'Диана [ФАМИЛИЯ] — [короткая строка об опыте и подходе].',
+    // TODO: заменить [короткая строка об опыте и подходе] настоящими данными
+    description: 'Диана Ардашева — [короткая строка об опыте и подходе].',
     cta: 'Записаться на разбор',
     // TODO: заменить [ЦЕНА] настоящими данными
-    ctaMobile: 'Записаться на разбор • [ЦЕНА]',
-    // TODO: заменить [ЦЕНА] настоящими данными
     priceNote: '[ЦЕНА] • онлайн',
+  },
+
+  // Окно контактов: его открывают все кнопки «Записаться на разбор». Ники и номер — в app/config/contacts.ts
+  contacts: {
+    title: 'Записаться на разбор',
+    intro: 'Напишите мне в удобный мессенджер — отвечу и подберём время.',
+    // Доступное имя кнопки «×»
+    closeLabel: 'Закрыть',
+    // Готовое сообщение (подставляется в WhatsApp и Telegram)
+    message: 'Здравствуйте! Хочу записаться на разбор матрицы судьбы.',
+    names: {
+      telegram: 'Telegram',
+      whatsapp: 'WhatsApp',
+      vk: 'VK',
+      instagram: 'Instagram',
+    },
   },
 } as const

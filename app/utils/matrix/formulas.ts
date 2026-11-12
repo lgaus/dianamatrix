@@ -20,20 +20,39 @@ export function calculatePoints({ day, month, year }: BirthDate): MatrixPoints {
   const E = reduce(A + B + C + D)
   const A1 = reduce(A + E)
   const B1 = reduce(B + E)
+  const C1 = reduce(C + E)
+  const D1 = reduce(D + E)
+  // Три узла на линии C1–D1: M — середина, MC — ближе к C1, MD — ближе к D1
+  const M = reduce(C1 + D1)
+  // Диагональные узлы: X1 = X + E (ближе к центру), X2 = X + X1 (между углом X и X1)
+  const F = reduce(A + B)
+  const G = reduce(B + C)
+  const H = reduce(C + D)
+  const I = reduce(D + A)
+  const F1 = reduce(F + E)
+  const G1 = reduce(G + E)
+  const H1 = reduce(H + E)
+  const I1 = reduce(I + E)
   return {
     A, B, C, D, E,
-    F: reduce(A + B),
-    G: reduce(B + C),
-    H: reduce(C + D),
-    I: reduce(D + A),
+    F, G, H, I,
     A1,
     A2: reduce(A + A1),
     A3: reduce(A1 + E),
     B1,
     B2: reduce(B + B1),
     B3: reduce(B1 + E),
-    C1: reduce(C + E),
-    D1: reduce(D + E),
+    C1,
+    C2: reduce(C + C1),
+    D1,
+    D2: reduce(D + D1),
+    M,
+    MC: reduce(M + C1),
+    MD: reduce(D1 + M),
+    F1, F2: reduce(F + F1),
+    G1, G2: reduce(G + G1),
+    H1, H2: reduce(H + H1),
+    I1, I2: reduce(I + I1),
   }
 }
 

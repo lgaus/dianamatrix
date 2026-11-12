@@ -1,5 +1,5 @@
 // Тесты шапки (шаг 5): ссылки навигации зависят от маршрута, бургер (компонент HeaderMenu) переключает меню
-// (на /about бургера нет), кнопка записи — кнопка без адреса (действие — шаг 10).
+// (на /about бургера нет), кнопка записи — кнопка без адреса, открывает окно контактов (шаг 10).
 // Формулировки не проверяются — только адреса и атрибуты. Поведение HeaderMenu отдельно — в HeaderMenu.test.ts.
 import { afterEach, describe, expect, it } from 'vitest'
 import { nextTick } from 'vue'
@@ -42,6 +42,17 @@ describe('AppHeader: route navigation', () => {
       expect(cta.attributes('type')).toBe('button')
       expect(cta.attributes('href')).toBeUndefined()
     }
+  })
+
+  it.each(['/', '/about'])('header booking button opens the contact dialog and is the focus return target (route %s)', async (route) => {
+    const wrapper = await mountSuspended(AppHeader, { route })
+    const cta = wrapper.get('[data-testid="header-cta"]')
+    const { isOpen, returnFocusTarget, close } = useContactDialog()
+
+    await cta.trigger('click')
+    expect(isOpen.value).toBe(true)
+    expect(returnFocusTarget.value).toBe(cta.element)
+    close()
   })
 
   it('on /about no burger or menu; booking button visible at all widths (no hidden)', async () => {

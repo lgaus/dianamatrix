@@ -22,13 +22,21 @@ export interface BirthDate {
   year: number
 }
 
+// Данные формы для расчёта: имя (без пробелов по краям; нет — undefined) и дата рождения
+export interface MatrixInput {
+  name: string | undefined
+  birthDate: BirthDate
+}
+
 // Имена точек матрицы
 export type PointKey =
   | 'A' | 'B' | 'C' | 'D' | 'E'
   | 'F' | 'G' | 'H' | 'I'
   | 'A1' | 'A2' | 'A3'
   | 'B1' | 'B2' | 'B3'
-  | 'C1' | 'D1'
+  | 'C1' | 'C2' | 'D1' | 'D2'
+  | 'M' | 'MC' | 'MD'
+  | 'F1' | 'F2' | 'G1' | 'G2' | 'H1' | 'H2' | 'I1' | 'I2'
 
 export type MatrixPoints = Record<PointKey, ArcanaNumber>
 
