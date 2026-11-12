@@ -25,7 +25,8 @@ const allChakraIdsCovered: MissingChakraIds extends never ? true : false = true
 
 const pointKeys = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
-  'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'D1',
+  'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'D1', 'D2', 'M', 'MC', 'MD',
+  'F1', 'F2', 'G1', 'G2', 'H1', 'H2', 'I1', 'I2',
 ] as const satisfies readonly PointKey[]
 
 type MissingPointKeys = Exclude<PointKey, (typeof pointKeys)[number]>
@@ -101,7 +102,7 @@ describe('all values are arcana numbers 1..22', () => {
     '%s',
     (_, date) => {
       const values = collectValues(calculateAll(date))
-      expect(values).toHaveLength(17 + 8 * 3 + 8)
+      expect(values).toHaveLength(30 + 8 * 3 + 8)
       expect(values.filter((value) => !isArcana(value))).toEqual([])
     },
   )
