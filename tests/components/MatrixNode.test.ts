@@ -38,6 +38,31 @@ describe('MatrixNode', () => {
     expect(Number(circle.attributes('stroke-width'))).toBeLessThan(Number(middle.get('circle').attributes('stroke-width')))
   })
 
+  it('small node has a thin matrix-line ring, no chakra color and is smaller than middle', async () => {
+    const small = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'small' })
+    const middle = await mountNode({ value: 8, cx: 0, cy: 0, kind: 'middle', ringClass: 'stroke-chakra-cyan' })
+    const circle = small.get('circle')
+    expect(circle.classes()).toContain('stroke-matrix-line')
+    expect(circle.classes().some(name => name.startsWith('stroke-chakra-'))).toBe(false)
+    expect(Number(circle.attributes('stroke-width'))).toBeLessThan(Number(middle.get('circle').attributes('stroke-width')))
+    expect(Number(circle.attributes('r'))).toBeLessThan(Number(middle.get('circle').attributes('r')))
+  })
+
+  it('small node with a chakra ring keeps the chakra color and the same outer size as the neutral small node', async () => {
+    const neutral = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'small' })
+    const colored = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'small', ringClass: 'stroke-chakra-green' })
+    const middle = await mountNode({ value: 8, cx: 0, cy: 0, kind: 'middle', ringClass: 'stroke-chakra-cyan' })
+    const circle = colored.get('circle')
+    expect(circle.classes()).toContain('stroke-chakra-green')
+    expect(circle.classes()).not.toContain('stroke-matrix-line')
+    const outerRadius = (wrapper: typeof neutral) => {
+      const element = wrapper.get('circle')
+      return Number(element.attributes('r')) + Number(element.attributes('stroke-width')) / 2
+    }
+    expect(outerRadius(colored)).toBe(outerRadius(neutral))
+    expect(outerRadius(colored)).toBeLessThan(outerRadius(middle))
+  })
+
   // Обводка рисуется по середине контура: r + stroke/2 = внешний радиус, одинаковый у middle и corner
   it('ring stays inside the outer diameter (same for middle and corner)', async () => {
     const outerRadius = async (kind: 'middle' | 'corner') => {

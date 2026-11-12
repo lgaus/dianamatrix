@@ -17,7 +17,9 @@ export const controlCases: Record<string, ControlCase> = {
       F: 21, G: 10, H: 9, I: 20,
       A1: 8, A2: 22, A3: 20,
       B1: 19, B2: 8, B3: 4,
-      C1: 6, D1: 18,
+      C1: 6, C2: 9, D1: 18, D2: 6,
+      M: 6, MC: 12, MD: 6,
+      F1: 6, F2: 9, G1: 22, G2: 5, H1: 21, H2: 3, I1: 5, I2: 7,
     },
     health: {
       sahasrara: { physics: 14, energy: 7, emotions: 21 },
@@ -42,7 +44,9 @@ export const controlCases: Record<string, ControlCase> = {
       F: 13, G: 12, H: 15, I: 16,
       A1: 21, A2: 5, A3: 4,
       B1: 12, B2: 14, B3: 22,
-      C1: 20, D1: 15,
+      C1: 20, C2: 3, D1: 15, D2: 20,
+      M: 8, MC: 10, MD: 5,
+      F1: 5, F2: 18, G1: 22, G2: 7, H1: 7, H2: 22, I1: 8, I2: 6,
     },
     health: {
       sahasrara: { physics: 11, energy: 2, emotions: 13 },
