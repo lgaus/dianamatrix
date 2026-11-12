@@ -1,5 +1,5 @@
 <script lang="ts">
-// id корня схемы: по нему форма прокручивает страницу к схеме после расчёта
+// id корня схемы: по нему useMatrix прокручивает страницу к схеме после расчёта
 export const MATRIX_CHART_ID = 'matrix-chart'
 </script>
 
