@@ -25,6 +25,15 @@ const close = () => {
   isOpen.value = false
 }
 
+// Кнопка записи в меню: меню закрывается, открывается окно контактов. Кнопка записи после этого скрыта
+// вместе с меню, поэтому после закрытия окна фокус возвращается на бургер
+const burgerButton = useTemplateRef<HTMLButtonElement>('burgerButton')
+const { open: openContactDialog } = useContactDialog()
+const openContacts = () => {
+  close()
+  openContactDialog(burgerButton.value)
+}
+
 // Анимация панели: проявление + небольшой сдвиг сверху от кнопки (origin — правый верх), 150 мс в обе стороны.
 // При исчезновении панель не принимает нажатия (pointer-events-none), чтобы клик не попал в уходящее меню.
 // duration-0 при reduced motion нужен Transition: он ждёт конца перехода по transition-duration, и без него
@@ -42,6 +51,7 @@ const transition = {
   <div class="relative">
     <!-- Открытое меню: иконка «×», кнопка в состоянии «нажата» (подкрашенный фон, затемнённая рамка) -->
     <button
+      ref="burgerButton"
       type="button"
       class="flex size-11 items-center justify-center rounded-xl border text-ink"
       :class="[
@@ -96,12 +106,12 @@ const transition = {
         >
           {{ texts.header.nav.about }}
         </NuxtLink>
-        <!-- TODO: шаг 10 — открывает окно контактов (Telegram, WhatsApp, VK, Instagram) -->
         <button
           type="button"
           class="rounded-xl px-4 py-3 text-left text-nav font-medium text-accent"
           :class="[interactiveClass, innerFocusClass, pressClass, tintFeedbackClass, accentTextFeedbackClass]"
           data-testid="header-menu-cta"
+          @click="openContacts"
         >
           {{ texts.header.cta }}
         </button>

@@ -27,7 +27,11 @@ watch(() => route.fullPath, () => {
 
 // При открытом меню шапка не прячется; после закрытия остаётся видимой до следующей прокрутки вниз
 const { isHidden, reveal } = useHideOnScroll()
+
 const isHeaderHidden = computed(() => isHidden.value && !isMenuOpen.value)
+
+// Кнопка записи открывает окно контактов; после закрытия фокус возвращается на неё
+const { open: openContactDialog } = useContactDialog()
 
 watch(isMenuOpen, (isOpen) => {
   if (!isOpen) reveal()
@@ -119,12 +123,12 @@ watch(isMenuOpen, (isOpen) => {
         </NuxtLink>
         <!-- Ниже md (только /about) — компактная: высота как у бургера; ниже xs (480 px) — короткий текст.
              Скрытый вариант — display: none, поэтому экранный диктор читает только видимый текст -->
-        <!-- TODO: шаг 10 — открывает окно контактов (Telegram, WhatsApp, VK, Instagram) -->
         <button
           type="button"
           class="inline-flex h-11 items-center rounded-full border border-line bg-surface px-4 text-nav font-medium whitespace-nowrap text-accent md:h-11.5 md:px-5"
           :class="[interactiveClass, outerFocusClass, pressClass, tintFeedbackClass, tintBorderFeedbackClass, accentTextFeedbackClass]"
           data-testid="header-cta"
+          @click="openContactDialog($event.currentTarget)"
         >
           <span
             class="xs:hidden"

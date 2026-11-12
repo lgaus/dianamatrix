@@ -165,6 +165,7 @@ describe('theme.css: fonts and effects', () => {
       .filter(name => name.startsWith('--opacity-'))
       .sort()
     expect(opacityTokens).toEqual([
+      '--opacity-backdrop',
       '--opacity-disabled',
       '--opacity-grain',
       '--opacity-matrix-axis',
@@ -191,6 +192,23 @@ describe('theme.css: fonts and effects', () => {
     expect(themeTokens.get('--radius-block')).toBe('28px')
     expect(themeTokens.get('--radius-card')).toBe('20px')
     expect(themeTokens.get('--radius-arch')).toBe('50%')
+  })
+
+  // Затемнение под окном контактов — модификатор цвета backdrop:bg-ink/backdrop, в процентах
+  it('--opacity-backdrop is a percent (for color-mix)', () => {
+    expect(themeTokens.get('--opacity-backdrop')).toMatch(/^\d+%$/)
+  })
+
+  // Арка-фото блока «Личный разбор»: верх — круг. Эллиптический процент под пропорции 340×420 (по высоте 170/420)
+  it('--radius-photo keeps a circular top for a 340×420 photo', () => {
+    const [horizontal, vertical] = (themeTokens.get('--radius-photo') ?? '').split(/\s+/).map(Number.parseFloat)
+    expect(horizontal).toBe(50)
+    expect((vertical ?? 0) * 420 / 100).toBeCloseTo(170, 1)
+  })
+
+  // Заголовок блока «Личный разбор» на телефоне (до xs) 22 px; в rem, чтобы рос с размером шрифта браузера
+  it('--text-title-xs is 22px in rem', () => {
+    expect(themeTokens.get('--text-title-xs')).toBe('1.375rem')
   })
 
   it('--text-logo is 19px, --text-nav is 15px', () => {

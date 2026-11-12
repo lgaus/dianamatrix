@@ -64,6 +64,17 @@ describe('HeaderMenu', () => {
     expect(opened.get('[data-testid="header-menu-icon"]').attributes('data-icon')).not.toBe(closedIconKind)
   })
 
+  it('booking button closes the menu and opens the contact dialog; focus returns to the burger', async () => {
+    const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
+    const { isOpen, returnFocusTarget, close } = useContactDialog()
+
+    await wrapper.get('[data-testid="header-menu-cta"]').trigger('click')
+    expect(wrapper.emitted('update:open')).toEqual([[false]])
+    expect(isOpen.value).toBe(true)
+    expect(returnFocusTarget.value).toBe(wrapper.get('[data-testid="header-menu-button"]').element)
+    close()
+  })
+
   it('menu link click emits update:open=false', async () => {
     const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
 
