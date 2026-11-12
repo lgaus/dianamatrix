@@ -58,8 +58,15 @@ const stringPaths = [
   'consultation.titleMobile',
   'consultation.description',
   'consultation.cta',
-  'consultation.ctaMobile',
   'consultation.priceNote',
+  'contacts.title',
+  'contacts.intro',
+  'contacts.closeLabel',
+  'contacts.message',
+  'contacts.names.telegram',
+  'contacts.names.whatsapp',
+  'contacts.names.vk',
+  'contacts.names.instagram',
 ]
 
 const cards = ['personal', 'social', 'spiritual', 'planetary'] as const
@@ -72,7 +79,7 @@ const dates = ['14.07.1992', '01.01.2000', '31.12.1985']
 
 describe('texts: structure', () => {
   it('has all sections', () => {
-    for (const section of ['header', 'form', 'matrix', 'healthMap', 'purpose', 'consultation']) {
+    for (const section of ['header', 'form', 'matrix', 'healthMap', 'purpose', 'consultation', 'contacts']) {
       expect(texts).toHaveProperty(section)
     }
   })

@@ -24,4 +24,12 @@
     background-color: var(--color-page);
     @apply scroll-pt-15 scroll-pb-2 md:scroll-pt-19.5;
   }
+
+  /*
+    Открыто окно контактов (модальный dialog) — страница под ним не прокручивается.
+    Место под полосу прокрутки зарезервировано (scrollbar-gutter), поэтому страница не сдвигается
+  */
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
 }
