@@ -1,0 +1,1 @@
+import{P as e,f as t}from"./CYkvmNtE.js";import{t as n}from"#entry";var r={},i={"data-testid":`about-page`};function a(n,r){return e(),t(`main`,i)}var o=n(r,[[`render`,a]]);export{o as default};
