@@ -36,6 +36,8 @@ describe('PurposeCard: structure', () => {
       const card = cards[index]!
       expect(cell.get('h3').text()).toBe(texts.purpose.terms[card])
       expect(cell.text()).toContain(texts.purpose.ages[card])
+      // Пустая подпись возраста — без элемента возраста (только h3 в шапке ячейки)
+      expect(cell.findAll('h3 ~ span')).toHaveLength(texts.purpose.ages[card] ? 1 : 0)
       expect(cell.findAll('[data-testid="purpose-number"]')).toHaveLength(1)
       expect(cell.findAll('[data-testid="purpose-formula"]')).toHaveLength(1)
     })
