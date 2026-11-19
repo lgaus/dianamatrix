@@ -26,7 +26,7 @@ const nodeRadius = (kind: MatrixNodeKind): number => NODE_SIZES[kind].diameter /
 const HALF_SIDE = 180 // полусторона квадрата F-G-H-I; на его сторонах лежат A2, B2, C2, D2
 const CORNER_DISTANCE = HALF_SIDE * Math.SQRT2 // от центра E до углов F, G, H, I
 // Зазор между краями соседних кругов троечки (X → X2 → X1), одинаковый на всех 8 лучах
-const TRIPLET_GAP = 1
+const TRIPLET_GAP = 1.2
 // Расстояние от E до центра узла, вплотную (с зазором gap) придвинутого к узлу from со стороны центра
 const inward = (from: number, fromKind: MatrixNodeKind, kind: MatrixNodeKind, gap = TRIPLET_GAP): number =>
   from - nodeRadius(fromKind) - gap - nodeRadius(kind)

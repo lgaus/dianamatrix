@@ -12,8 +12,8 @@ export const NODE_SIZES: Record<MatrixNodeKind, { diameter: number, stroke: numb
   outer: { diameter: 70, stroke: 4, fontSize: 26 }, // главные пять: центр E и A, B, C, D — одного размера
   corner: { diameter: 58, stroke: NEUTRAL_STROKE, fontSize: 22 }, // F, G, H, I: крупнее X2, мельче главных
   middle: { diameter: 50, stroke: 3, fontSize: 20 }, // вторые точки троечек: A2, B2, C2, D2, F2, G2, H2, I2
-  inner: { diameter: 30, stroke: 2, fontSize: 14 }, // третьи точки троечек A1, B1, C1, D1, F1, G1, H1, I1 и зелёные A3, B3
-  small: { diameter: 30, stroke: NEUTRAL_STROKE, fontSize: 14 }, // M, MC, MD на пунктире C1–D1 и EC1, EC2 (код внутренней силы) между E и C1
+  inner: { diameter: 32, stroke: 2, fontSize: 14 }, // третьи точки троечек A1, B1, C1, D1, F1, G1, H1, I1 и зелёные A3, B3
+  small: { diameter: 32, stroke: NEUTRAL_STROKE, fontSize: 14 }, // M, MC, MD на пунктире C1–D1 и EC1, EC2 (код внутренней силы) между E и C1
 }
 </script>
 
