@@ -20,7 +20,7 @@ const NAME_MAX_LENGTH = 50
 
 type Mode = 'personal' | 'couple'
 
-// «Для пары» — только визуально, до шага 14
+// «Для пары» — только визуально, до шага 15
 const tabs: ReadonlyArray<FormTab<Mode>> = [
   { id: 'personal', label: texts.form.tabs.personal },
   { id: 'couple', label: texts.form.tabs.couple, disabled: true, note: texts.form.soon },
