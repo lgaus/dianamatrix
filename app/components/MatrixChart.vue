@@ -62,6 +62,11 @@ const LINE_WIDTH = 1 // пунктирная линия C1–D1
 const LINE_DASH = '4 4' // штрих и пробел пунктира, в единицах viewBox
 // Доли пути от C1 к D1 (0 — C1, 1 — D1), на которых стоят узлы MC, M, MD; меняй, чтобы сдвинуть узлы по линии
 const LINE_FRACTIONS = { MC: 1 / 3, M: 1 / 2, MD: 4 / 6 } as const
+// Иконки «деньги» (у C1) и «любовь» (у D1) снаружи пунктира: сторона в единицах viewBox и толщина линии знака «$»
+const ICON_SIZE = 24
+const MONEY_ICON_STROKE = 2.5
+// Сдвиг центра иконки от пунктира наружу по x и по y: середина полосы между пунктиром и контуром ромба C–D
+const ICON_OFFSET = (RADIUS - RAY_OFFSETS[1]) / 4
 // Зерно: частота шума feTurbulence (чем больше, тем мельче зерно) и число слоёв шума
 const GRAIN_FREQUENCY = 0.8
 const GRAIN_OCTAVES = 3
@@ -146,6 +151,15 @@ const nodes = (Object.keys(positions) as PointKey[]).map(key => ({
   ringClass: ringClasses[key],
 }))
 
+// Левый верхний угол иконки, центр которой — напротив доли fraction пути C1→D1, в середине полосы снаружи пунктира
+const iconCorner = (fraction: number): [x: number, y: number] => {
+  const [x, y] = onLine(fraction)
+  return [x + ICON_OFFSET - ICON_SIZE / 2, y + ICON_OFFSET - ICON_SIZE / 2]
+}
+// Деньги — посередине между C1 и MC, любовь — зеркально, посередине между MD и D1
+const moneyIcon = iconCorner(LINE_FRACTIONS.MC / 2)
+const loveIcon = iconCorner((LINE_FRACTIONS.MD + 1) / 2)
+
 const toPoints = (keys: PointKey[]): string => keys.map(key => positions[key].join(',')).join(' ')
 // Контуры: ромб A-B-C-D и квадрат F-G-H-I
 const outlines = [toPoints(['A', 'B', 'C', 'D']), toPoints(['F', 'G', 'H', 'I'])]
@@ -225,6 +239,34 @@ const grainId = useId()
         class="stroke-matrix-line/matrix-edge"
         data-testid="matrix-dashed-line"
       />
+      <!-- Декоративные иконки снаружи пунктира: «$» у C1, сердце у D1 -->
+      <svg
+        :x="moneyIcon[0]"
+        :y="moneyIcon[1]"
+        :width="ICON_SIZE"
+        :height="ICON_SIZE"
+        viewBox="0 0 24 24"
+        fill="none"
+        :stroke-width="MONEY_ICON_STROKE"
+        stroke-linecap="round"
+        class="stroke-matrix-line"
+        aria-hidden="true"
+        data-testid="matrix-icon-money"
+      >
+        <path d="M16.5 7.5c-.6-1.5-2.3-2.5-4.5-2.5-2.5 0-4.5 1.4-4.5 3.4 0 4.6 9 2.6 9 7.2 0 2-2 3.4-4.5 3.4-2.2 0-3.9-1-4.5-2.5M12 2.5v19" />
+      </svg>
+      <svg
+        :x="loveIcon[0]"
+        :y="loveIcon[1]"
+        :width="ICON_SIZE"
+        :height="ICON_SIZE"
+        viewBox="0 0 24 24"
+        class="fill-matrix-line"
+        aria-hidden="true"
+        data-testid="matrix-icon-love"
+      >
+        <path d="M12 19.7 4.2 12a4.8 4.8 0 0 1 7.8-5.6 4.8 4.8 0 0 1 7.8 5.6Z" />
+      </svg>
       <MatrixNode
         v-for="node in nodes"
         :key="node.key"

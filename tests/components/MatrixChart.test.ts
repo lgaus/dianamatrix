@@ -254,6 +254,112 @@ describe('MatrixChart: rings and geometry', () => {
   })
 })
 
+// Иконки «деньги» (у C1) и «любовь» (у D1) снаружи пунктира C1–D1: только структура и геометрия
+describe('MatrixChart: decorative icons', () => {
+  type Box = { x0: number, y0: number, x1: number, y1: number }
+  const iconIds = ['love', 'money'] as const
+  const icon = (wrapper: VueWrapper, id: typeof iconIds[number]) => wrapper.get(`[data-testid="matrix-icon-${id}"]`)
+  const box = (wrapper: VueWrapper, id: typeof iconIds[number]): Box => {
+    const element = icon(wrapper, id)
+    const x = Number(element.attributes('x'))
+    const y = Number(element.attributes('y'))
+    return { x0: x, y0: y, x1: x + Number(element.attributes('width')), y1: y + Number(element.attributes('height')) }
+  }
+  const middle = (b: Box): [number, number] => [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]
+  // Система координат линии C1 → D1: s — вдоль линии от C1, d — от линии наружу (от центра E)
+  const frame = (wrapper: VueWrapper) => {
+    const [c1x, c1y] = center(wrapper, 'C1')
+    const [d1x, d1y] = center(wrapper, 'D1')
+    const [ex, ey] = center(wrapper, 'E')
+    const length = Math.hypot(d1x - c1x, d1y - c1y)
+    const u = [(d1x - c1x) / length, (d1y - c1y) / length] as const
+    // Наружу: единичный вектор от E к середине отрезка C1–D1
+    const mx = (c1x + d1x) / 2 - ex
+    const my = (c1y + d1y) / 2 - ey
+    const norm = Math.hypot(mx, my)
+    const n = [mx / norm, my / norm] as const
+    const project = ([x, y]: [number, number]) => ({
+      s: (x - c1x) * u[0] + (y - c1y) * u[1],
+      d: (x - c1x) * n[0] + (y - c1y) * n[1],
+    })
+    return { project, length }
+  }
+  // Расстояние от прямоугольника до круга и до отрезка
+  const gapToCircle = (b: Box, [cx, cy]: [number, number], radius: number) =>
+    Math.hypot(Math.max(b.x0 - cx, 0, cx - b.x1), Math.max(b.y0 - cy, 0, cy - b.y1)) - radius
+  // Прямой квадрат и линия под 45°: зазор = расстояние от центра до линии − (сторона / 2)·√2
+  const gapToDiagonal = (b: Box, distanceFromLine: number) => distanceFromLine - ((b.x1 - b.x0) / 2) * Math.SQRT2
+  const propsVariants = [{}, { points: calculatePoints(DATE), birthDate: DATE }]
+
+  it('both icons render with and without data, decorative and non-interactive', async () => {
+    for (const props of propsVariants) {
+      const wrapper = await mountSuspended(MatrixChart, { props })
+      for (const id of iconIds) {
+        const element = icon(wrapper, id)
+        expect(element.element.tagName.toLowerCase()).toBe('svg')
+        expect(element.attributes('aria-hidden')).toBe('true')
+        expect(element.attributes('data-point')).toBeUndefined()
+      }
+      expect(wrapper.findAll('[data-testid^="matrix-icon-"]')).toHaveLength(2)
+    }
+  })
+
+  it('icons are drawn after the dashed line and use the matrix line color token', async () => {
+    const wrapper = await mountSuspended(MatrixChart)
+    const html = wrapper.html()
+    for (const id of iconIds) {
+      expect(html.indexOf('matrix-dashed-line')).toBeLessThan(html.indexOf(`matrix-icon-${id}`))
+    }
+    expect(icon(wrapper, 'love').classes()).toContain('fill-matrix-line')
+    expect(icon(wrapper, 'money').classes()).toContain('stroke-matrix-line')
+  })
+
+  it('icon centers lie on the outer side of C1-D1, between the line and the rhombus edge C-D', async () => {
+    const wrapper = await mountSuspended(MatrixChart)
+    const { project } = frame(wrapper)
+    const edge = project(center(wrapper, 'C')).d
+    expect(edge).toBeGreaterThan(0)
+    for (const id of iconIds) {
+      const { d } = project(middle(box(wrapper, id)))
+      expect(d, id).toBeGreaterThan(0)
+      expect(d, id).toBeLessThan(edge)
+    }
+  })
+
+  it('heart projects between MD and D1, money between C1 and MC', async () => {
+    const wrapper = await mountSuspended(MatrixChart)
+    const { project } = frame(wrapper)
+    const s = (key: PointKey) => project(center(wrapper, key)).s
+    const love = project(middle(box(wrapper, 'love'))).s
+    const money = project(middle(box(wrapper, 'money'))).s
+    expect(love).toBeGreaterThan(s('MD'))
+    expect(love).toBeLessThan(s('D1'))
+    expect(money).toBeGreaterThan(s('C1'))
+    expect(money).toBeLessThan(s('MC'))
+  })
+
+  it('icon boxes do not intersect any node circle and keep clear of the dashed line', async () => {
+    const wrapper = await mountSuspended(MatrixChart)
+    const { project } = frame(wrapper)
+    for (const id of iconIds) {
+      const b = box(wrapper, id)
+      for (const key of pointKeys) {
+        expect(gapToCircle(b, center(wrapper, key), outerRadius(wrapper, key)), `${id} and ${key}`).toBeGreaterThan(0)
+      }
+      expect(gapToDiagonal(b, project(middle(b)).d), `${id} and dashed line`).toBeGreaterThan(0)
+    }
+  })
+
+  it('icons are mirror images of each other across the diagonal y = x of the chart', async () => {
+    const wrapper = await mountSuspended(MatrixChart)
+    const [lx, ly] = middle(box(wrapper, 'love'))
+    const [mx, my] = middle(box(wrapper, 'money'))
+    expect(lx).toBeCloseTo(my, 6)
+    expect(ly).toBeCloseTo(mx, 6)
+    expect(Number(icon(wrapper, 'love').attributes('width'))).toBe(Number(icon(wrapper, 'money').attributes('width')))
+  })
+})
+
 describe('MatrixChart: caption and accessibility', () => {
   it('caption contains the formatted date and the name', async () => {
     const wrapper = await mountSuspended(MatrixChart, {
