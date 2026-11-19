@@ -44,16 +44,56 @@ const transition = {
   leaveActiveClass: 'pointer-events-none transition duration-150 ease-in motion-reduce:transition-none motion-reduce:duration-0',
   leaveToClass: 'opacity-0 -translate-y-1 scale-95',
 }
+
+// Затемнение под открытым меню: проявляется и исчезает вместе с панелью (150 мс).
+// При исчезновении нажатия не пропускает: иначе конец касания попал бы в элемент под ним
+const backdropTransition = {
+  enterActiveClass: 'transition-opacity duration-150 ease-out motion-reduce:transition-none motion-reduce:duration-0',
+  enterFromClass: 'opacity-0',
+  leaveActiveClass: 'transition-opacity duration-150 ease-in motion-reduce:transition-none motion-reduce:duration-0',
+  leaveToClass: 'opacity-0',
+}
+
+// Нажатие вне меню (на затемнение) закрывает меню сразу — и при касании, и в начале прокрутки
+const onBackdropPointerdown = () => {
+  close()
+}
+
+// Касание затемнения ничего не нажимает: клик (и фокус) после касания отменяются, иначе при долгом касании
+// он достался бы элементу под уже исчезнувшим затемнением (браузер ищет цель клика в конце касания).
+// После прокрутки touchend не отменяется (cancelable = false) — тогда и клика нет
+const onBackdropTouchend = (event: TouchEvent) => {
+  if (event.cancelable) event.preventDefault()
+}
 </script>
 
 <template>
   <!-- Панель — под кнопкой с зазором, по её правому краю -->
   <div class="relative">
+    <!-- Затемнение на весь экран, включая шапку; над ним — только бургер и панель (позиционированы позже в разметке / z-10).
+         v-show, а не v-if: touchend приходит элементу, на котором началось касание, и должен дойти до обработчика -->
+    <Transition v-bind="backdropTransition">
+      <div
+        v-show="isOpen"
+        class="fixed inset-0 bg-ink/backdrop"
+        aria-hidden="true"
+        data-testid="header-menu-backdrop"
+        @pointerdown="onBackdropPointerdown"
+        @touchend="onBackdropTouchend"
+      />
+    </Transition>
+
+    <!-- Непрозрачная подложка под кнопкой: подкрашенный фон нажатой кнопки не просвечивает сквозь затемнение -->
+    <div
+      class="absolute inset-0 rounded-xl bg-surface"
+      aria-hidden="true"
+    />
+
     <!-- Открытое меню: иконка «×», кнопка в состоянии «нажата» (подкрашенный фон, затемнённая рамка) -->
     <button
       ref="burgerButton"
       type="button"
-      class="flex size-11 items-center justify-center rounded-xl border text-ink"
+      class="relative flex size-11 items-center justify-center rounded-xl border text-ink"
       :class="[
         interactiveClass,
         outerFocusClass,
@@ -90,7 +130,7 @@ const transition = {
       </svg>
     </button>
 
-    <!-- Выпадающее меню (доводка поведения — шаг 12) -->
+    <!-- Выпадающее меню: закрывается нажатием на затемнение, бургером, пунктом меню -->
     <Transition v-bind="transition">
       <nav
         v-show="isOpen"

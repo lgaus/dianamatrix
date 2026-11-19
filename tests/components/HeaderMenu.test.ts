@@ -75,6 +75,41 @@ describe('HeaderMenu', () => {
     close()
   })
 
+  it('backdrop: shown only when open', async () => {
+    const closed = await mountSuspended(HeaderMenu, { props: { open: false }, route: '/' })
+    const closedBackdrop = closed.find('[data-testid="header-menu-backdrop"]')
+    expect(!closedBackdrop.exists() || !isShown(closedBackdrop.element)).toBe(true)
+    closed.unmount()
+
+    const opened = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
+    const backdrop = opened.get('[data-testid="header-menu-backdrop"]')
+    expect(isShown(backdrop.element)).toBe(true)
+    expect(backdrop.attributes('aria-hidden')).toBe('true')
+  })
+
+  it('pointerdown on backdrop emits update:open=false; inside the menu does nothing', async () => {
+    const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
+
+    await wrapper.get('[data-testid="header-menu"]').trigger('pointerdown')
+    expect(wrapper.emitted('update:open')).toBeUndefined()
+
+    await wrapper.get('[data-testid="header-menu-backdrop"]').trigger('pointerdown')
+    expect(wrapper.emitted('update:open')).toEqual([[false]])
+  })
+
+  it('touchend on backdrop is preventDefault-ed when cancelable, not otherwise', async () => {
+    const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
+    const backdrop = wrapper.get('[data-testid="header-menu-backdrop"]').element
+
+    const cancelable = new Event('touchend', { bubbles: true, cancelable: true })
+    backdrop.dispatchEvent(cancelable)
+    expect(cancelable.defaultPrevented).toBe(true)
+
+    const notCancelable = new Event('touchend', { bubbles: true, cancelable: false })
+    backdrop.dispatchEvent(notCancelable)
+    expect(notCancelable.defaultPrevented).toBe(false)
+  })
+
   it('menu link click emits update:open=false', async () => {
     const wrapper = await mountSuspended(HeaderMenu, { props: { open: true }, route: '/' })
 

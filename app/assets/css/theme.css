@@ -83,7 +83,7 @@
   --opacity-matrix-edge: 70%;
   --opacity-matrix-axis: 40%;
 
-  /* Затемнение страницы под окном контактов: ink с этой прозрачностью (backdrop:bg-ink/backdrop) */
+  /* Затемнение страницы под окном контактов (backdrop:bg-ink/backdrop) и под меню-бургером (bg-ink/backdrop): ink с этой прозрачностью */
   --opacity-backdrop: 40%;
 
   /* Тень выпадающего меню (shadow-menu): мягкая, отделяет панель от белой карточки под ней */
