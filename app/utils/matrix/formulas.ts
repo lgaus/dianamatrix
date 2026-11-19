@@ -1,5 +1,5 @@
 // ТЕСТОВЫЕ ФОРМУЛЫ, заменить на методику Дианы.
-// Правила — PLAN.md, шаг 4. Только чистые функции.
+// Правила — PLAN.md, шаг 4 + решения шага 10. Только чистые функции.
 import type { ArcanaNumber, BirthDate, Chakra, ChakraId, HealthMap, HealthRow, MatrixPoints, Purpose } from './types'
 
 const digitSum = (n: number): number =>
@@ -33,6 +33,9 @@ export function calculatePoints({ day, month, year }: BirthDate): MatrixPoints {
   const G1 = reduce(G + E)
   const H1 = reduce(H + E)
   const I1 = reduce(I + E)
+  // Код внутренней силы: E – EC1 – EC2 (L2 = F+G+H+I, L1 = E+L2)
+  const EC1 = reduce(F + G + H + I)
+  const EC2 = reduce(E + EC1)
   return {
     A, B, C, D, E,
     F, G, H, I,
@@ -53,6 +56,7 @@ export function calculatePoints({ day, month, year }: BirthDate): MatrixPoints {
     G1, G2: reduce(G + G1),
     H1, H2: reduce(H + H1),
     I1, I2: reduce(I + I1),
+    EC1, EC2,
   }
 }
 

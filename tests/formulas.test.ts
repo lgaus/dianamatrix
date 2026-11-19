@@ -1,7 +1,7 @@
 /// <reference types="node" />
-// Тесты тестовых формул (шаг 4): контрольные значения для 14.07.1992 и 11.02.1999,
+// Тесты тестовых формул (шаги 4, 10): контрольные значения для 14.07.1992 и 11.02.1999, эталон 07.05.1992 со шпаргалки пользователя,
 // reduce на границах, диапазон 1..22 на множестве дат, конфиг чакр, чистота formulas.ts.
-// Эталоны — данные, посчитанные вручную по правилам PLAN.md, а не тексты.
+// Эталоны — данные, посчитанные вручную по правилам PLAN.md, шаг 4 + решения шага 10, а не тексты.
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -26,7 +26,7 @@ const allChakraIdsCovered: MissingChakraIds extends never ? true : false = true
 const pointKeys = [
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
   'A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'D1', 'D2', 'M', 'MC', 'MD',
-  'F1', 'F2', 'G1', 'G2', 'H1', 'H2', 'I1', 'I2',
+  'F1', 'F2', 'G1', 'G2', 'H1', 'H2', 'I1', 'I2', 'EC1', 'EC2',
 ] as const satisfies readonly PointKey[]
 
 type MissingPointKeys = Exclude<PointKey, (typeof pointKeys)[number]>
@@ -77,6 +77,17 @@ describe.each(Object.entries(controlCases))('control date %s', (_, control) => {
   })
 })
 
+// Эталон со шпаргалки пользователя: углы, центр и код внутренней силы E – EC1 – EC2 (12-6-18)
+describe('reference sheet 07.05.1992', () => {
+  it('calculates main points, corners and the inner force code', () => {
+    expect(calculatePoints({ day: 7, month: 5, year: 1992 })).toMatchObject({
+      A: 7, B: 5, C: 21, D: 6, E: 12,
+      F: 12, G: 8, H: 9, I: 13,
+      EC1: 6, EC2: 18,
+    })
+  })
+})
+
 describe('all values are arcana numbers 1..22', () => {
   // Обязательные даты + края месяцев и годов в диапазоне 1900..2099
   const namedDates: BirthDate[] = [
@@ -102,7 +113,7 @@ describe('all values are arcana numbers 1..22', () => {
     '%s',
     (_, date) => {
       const values = collectValues(calculateAll(date))
-      expect(values).toHaveLength(30 + 8 * 3 + 8)
+      expect(values).toHaveLength(32 + 8 * 3 + 8)
       expect(values.filter((value) => !isArcana(value))).toEqual([])
     },
   )

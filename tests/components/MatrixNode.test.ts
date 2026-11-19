@@ -1,4 +1,4 @@
-// Тесты круга схемы (шаг 7): число или «–», кольцо чакры или тонкое кольцо угла, кольцо не выходит за внешний диаметр.
+// Тесты круга схемы (шаги 7, 10): число или «–», кольцо чакры или тонкое кольцо цвета линий, ярусы размеров, кольцо не меняет внешний диаметр.
 import { describe, expect, it } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import MatrixNode from '~/components/MatrixNode.vue'
@@ -6,6 +6,11 @@ import { texts } from '~/content/texts'
 
 const mountNode = (props: InstanceType<typeof MatrixNode>['$props']) =>
   mountSuspended(MatrixNode, { props })
+// Внешний радиус круга с кольцом: обводка рисуется по середине контура
+const outerRadius = (wrapper: Awaited<ReturnType<typeof mountNode>>) => {
+  const circle = wrapper.get('circle')
+  return Number(circle.attributes('r')) + Number(circle.attributes('stroke-width')) / 2
+}
 
 describe('MatrixNode', () => {
   it('shows the value at the circle center', async () => {
@@ -20,7 +25,7 @@ describe('MatrixNode', () => {
   })
 
   it('shows the empty value without data', async () => {
-    const wrapper = await mountNode({ cx: 0, cy: 0, kind: 'center', ringClass: 'stroke-chakra-yellow' })
+    const wrapper = await mountNode({ cx: 0, cy: 0, kind: 'outer', ringClass: 'stroke-chakra-yellow' })
     expect(wrapper.get('text').text()).toBe(texts.matrix.emptyValue)
   })
 
@@ -48,27 +53,35 @@ describe('MatrixNode', () => {
     expect(Number(circle.attributes('r'))).toBeLessThan(Number(middle.get('circle').attributes('r')))
   })
 
-  it('small node with a chakra ring keeps the chakra color and the same outer size as the neutral small node', async () => {
-    const neutral = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'small' })
-    const colored = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'small', ringClass: 'stroke-chakra-green' })
-    const middle = await mountNode({ value: 8, cx: 0, cy: 0, kind: 'middle', ringClass: 'stroke-chakra-cyan' })
+  it('inner node with a chakra ring keeps the chakra color and the same outer size as the neutral inner node', async () => {
+    const neutral = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'inner' })
+    const colored = await mountNode({ value: 12, cx: 0, cy: 0, kind: 'inner', ringClass: 'stroke-chakra-green' })
     const circle = colored.get('circle')
     expect(circle.classes()).toContain('stroke-chakra-green')
     expect(circle.classes()).not.toContain('stroke-matrix-line')
-    const outerRadius = (wrapper: typeof neutral) => {
-      const element = wrapper.get('circle')
-      return Number(element.attributes('r')) + Number(element.attributes('stroke-width')) / 2
-    }
+    expect(neutral.get('circle').classes()).toContain('stroke-matrix-line')
+    // Кольцо чакры толще тонкого, чтобы цвет читался
+    expect(Number(circle.attributes('stroke-width'))).toBeGreaterThan(Number(neutral.get('circle').attributes('stroke-width')))
     expect(outerRadius(colored)).toBe(outerRadius(neutral))
-    expect(outerRadius(colored)).toBeLessThan(outerRadius(middle))
   })
 
-  // Обводка рисуется по середине контура: r + stroke/2 = внешний радиус, одинаковый у middle и corner
-  it('ring stays inside the outer diameter (same for middle and corner)', async () => {
-    const outerRadius = async (kind: 'middle' | 'corner') => {
-      const circle = (await mountNode({ cx: 0, cy: 0, kind })).get('circle')
-      return Number(circle.attributes('r')) + Number(circle.attributes('stroke-width')) / 2
+  // Ярусы: главные пять (E, A–D) > углы F–I > вторые точки троечек > третьи точки троечек; шрифт уменьшается вместе с кругом
+  it('node sizes and fonts shrink by tier: outer, corner, middle, inner', async () => {
+    const kinds = ['outer', 'corner', 'middle', 'inner'] as const
+    const wrappers = await Promise.all(kinds.map(kind => mountNode({ value: 22, cx: 0, cy: 0, kind })))
+    const radii = wrappers.map(outerRadius)
+    const fonts = wrappers.map(wrapper => Number(wrapper.get('text').attributes('font-size')))
+    for (let index = 1; index < kinds.length; index++) {
+      expect(radii[index], kinds[index]).toBeLessThan(radii[index - 1]!)
+      expect(fonts[index], kinds[index]).toBeLessThan(fonts[index - 1]!)
     }
-    expect(await outerRadius('middle')).toBe(await outerRadius('corner'))
+  })
+
+  // Обводка рисуется по середине контура: r + stroke/2 = внешний радиус; у узла без чакры (C2) он тот же, что у узла с чакрой (A2)
+  it('ring stays inside the outer diameter with and without a chakra ring', async () => {
+    const colored = await mountNode({ cx: 0, cy: 0, kind: 'middle', ringClass: 'stroke-chakra-blue' })
+    const neutral = await mountNode({ cx: 0, cy: 0, kind: 'middle' })
+    expect(outerRadius(neutral)).toBe(outerRadius(colored))
+    expect(Number(neutral.get('circle').attributes('stroke-width'))).toBeLessThan(Number(colored.get('circle').attributes('stroke-width')))
   })
 })

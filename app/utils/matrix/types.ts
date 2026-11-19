@@ -37,6 +37,7 @@ export type PointKey =
   | 'C1' | 'C2' | 'D1' | 'D2'
   | 'M' | 'MC' | 'MD'
   | 'F1' | 'F2' | 'G1' | 'G2' | 'H1' | 'H2' | 'I1' | 'I2'
+  | 'EC1' | 'EC2'
 
 export type MatrixPoints = Record<PointKey, ArcanaNumber>
 

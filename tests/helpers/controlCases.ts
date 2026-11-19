@@ -1,5 +1,5 @@
-// Контрольные значения расчёта (шаг 4): общие для тестов формул и связки (useMatrix).
-// Эталоны посчитаны вручную по правилам PLAN.md.
+// Контрольные значения расчёта (шаги 4, 10): общие для тестов формул и связки (useMatrix).
+// Эталоны посчитаны вручную по правилам PLAN.md, шаг 4 + решения шага 10.
 import type { BirthDate, HealthMap, MatrixPoints, Purpose } from '~/utils/matrix/types'
 
 export interface ControlCase {
@@ -20,6 +20,7 @@ export const controlCases: Record<string, ControlCase> = {
       C1: 6, C2: 9, D1: 18, D2: 6,
       M: 6, MC: 12, MD: 6,
       F1: 6, F2: 9, G1: 22, G2: 5, H1: 21, H2: 3, I1: 5, I2: 7,
+      EC1: 6, EC2: 18,
     },
     health: {
       sahasrara: { physics: 14, energy: 7, emotions: 21 },
@@ -47,6 +48,7 @@ export const controlCases: Record<string, ControlCase> = {
       C1: 20, C2: 3, D1: 15, D2: 20,
       M: 8, MC: 10, MD: 5,
       F1: 5, F2: 18, G1: 22, G2: 7, H1: 7, H2: 22, I1: 8, I2: 6,
+      EC1: 11, EC2: 21,
     },
     health: {
       sahasrara: { physics: 11, energy: 2, emotions: 13 },
